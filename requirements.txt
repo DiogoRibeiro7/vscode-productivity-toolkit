@@ -20,7 +20,7 @@
 # SOFTWARE.
 
 pytest>=7.4,<9.0
-pytest-cov>=4.1,<5.0
+pytest-cov>=4.1,<8.0
 jsonschema>=4.19,<5.0
 bandit>=1.7,<2.0
 codespell>=2.2,<3.0

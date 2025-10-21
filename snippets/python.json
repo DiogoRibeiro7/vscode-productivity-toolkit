@@ -1,0 +1,29 @@
+{
+  "_metadata": {
+    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
+    "description": "Reusable Python snippets for logging and testing.",
+    "version": "1.0.0"
+  },
+  "StructuredLogger": {
+    "prefix": "logdebug",
+    "body": [
+      "logger = get_logger(\"${1:component}\")",
+      "logger.debug(\"${2:message}\", extra={\"extra\": {\"context\": \"${3:details}\"}})"
+    ],
+    "description": "Emit a structured DEBUG log entry using toolkit logging helpers."
+  },
+  "PytestArrangeActAssert": {
+    "prefix": "paa",
+    "body": [
+      "# Arrange",
+      "${1:setup}",
+      "",
+      "# Act",
+      "${2:result} = ${3:function_under_test}(${4:arguments})",
+      "",
+      "# Assert",
+      "assert ${5:expected} == ${2:result}"
+    ],
+    "description": "Arrange-Act-Assert template for pytest cases."
+  }
+}

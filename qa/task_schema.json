@@ -1,0 +1,107 @@
+{
+  "_metadata": {
+    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
+    "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
+    "description": "Schema for validating VS Code task definitions included in the toolkit."
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VS Code Productivity Toolkit Task Schema",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["version", "tasks"],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": {"type": "string"},
+          "type": {"type": "string"}
+        }
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["label"],
+        "properties": {
+          "label": {"type": "string"},
+          "type": {"type": "string"},
+          "command": {
+            "anyOf": [
+              {"type": "string"},
+              {
+                "type": "array",
+                "items": {"type": "string"},
+                "minItems": 1
+              }
+            ]
+          },
+          "problemMatcher": {
+            "anyOf": [
+              {"type": "string"},
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {"type": "string"},
+                    {"type": "object", "additionalProperties": true}
+                  ]
+                }
+              }
+            ]
+          },
+          "presentation": {"type": "object"},
+          "group": {
+            "anyOf": [
+              {"type": "string"},
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {"type": "string"},
+                  "isDefault": {"type": "boolean"}
+                }
+              }
+            ]
+          },
+          "dependsOn": {
+            "anyOf": [
+              {"type": "string"},
+              {
+                "type": "array",
+                "items": {"type": "string"},
+                "minItems": 1
+              }
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "problemMatchers": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {"type": "string"},
+          {"type": "object", "additionalProperties": true}
+        ]
+      }
+    },
+    "_metadata": {
+      "type": "object",
+      "required": ["license", "maintainer"],
+      "properties": {
+        "license": {"type": "string"},
+        "maintainer": {"type": "string"},
+        "description": {"type": "string"}
+      },
+      "additionalProperties": true
+    }
+  }
+}

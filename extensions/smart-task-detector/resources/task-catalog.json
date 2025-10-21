@@ -1,0 +1,29 @@
+{
+  "_metadata": {
+    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
+    "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
+    "description": "Reference catalogue for Smart Task Detector recommendations."
+  },
+  "recommendations": [
+    {
+      "id": "python-data-science",
+      "tasks": ["tasks/python/data-science.json"],
+      "summary": "Data science automation for notebooks, profiling, and docs."
+    },
+    {
+      "id": "python-general",
+      "tasks": ["tasks/python/general.json"],
+      "summary": "Core Python linting, testing, packaging, and release workflows."
+    },
+    {
+      "id": "javascript-react",
+      "tasks": ["tasks/javascript/react.json"],
+      "summary": "React + TypeScript tooling including Storybook, Jest, and Lighthouse."
+    },
+    {
+      "id": "javascript-node",
+      "tasks": ["tasks/javascript/node.json"],
+      "summary": "Node API automation with database migrations, Docker, and profiling."
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "_metadata": {
+    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
+    "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
+    "description": "TypeScript configuration for the Smart Task Detector extension."
+  },
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2020",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "sourceMap": false,
+    "declaration": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", ".vscode-test"]
+}

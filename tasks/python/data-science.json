@@ -1,0 +1,500 @@
+{
+  "_metadata": {
+    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
+    "maintainer": "Diogo Ribeiro <diogo.debastos.ribeiro@gmail.com>",
+    "description": "VS Code tasks tailored for Python data science workflows with reproducible automation.",
+    "version": "1.0.0"
+  },
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "notebookPath",
+      "type": "promptString",
+      "description": "Relative path to the Jupyter notebook (e.g. notebooks/analysis.ipynb)",
+      "default": "notebooks/analysis.ipynb"
+    },
+    {
+      "id": "profilingOutput",
+      "type": "promptString",
+      "description": "Output file name for cProfile stats",
+      "default": "profile.stats"
+    },
+    {
+      "id": "datasetPath",
+      "type": "promptString",
+      "description": "Dataset path for profiling reports",
+      "default": "data/raw/dataset.csv"
+    },
+    {
+      "id": "virtualEnvName",
+      "type": "promptString",
+      "description": "Name for the data science virtual environment",
+      "default": ".venv-ds"
+    },
+    {
+      "id": "requirementsExportFormat",
+      "type": "pickString",
+      "description": "Select dependency export strategy",
+      "options": [
+        "pip-freeze",
+        "conda-env",
+        "pip-tools"
+      ],
+      "default": "pip-freeze"
+    },
+    {
+      "id": "sphinxBuilder",
+      "type": "pickString",
+      "description": "Select Sphinx builder target",
+      "options": [
+        "html",
+        "dirhtml",
+        "linkcheck"
+      ],
+      "default": "html"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "data-science:create-virtual-environment",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "venv",
+        "${input:virtualEnvName}"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "-m",
+          "venv",
+          "${input:virtualEnvName}"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "problemMatcher": [
+        {
+          "owner": "python-traceback",
+          "pattern": [
+            {
+              "regexp": "^  File \"([^\"]+)\", line (\\d+).*$",
+              "file": 1,
+              "line": 2
+            },
+            {
+              "regexp": "^    (.*)$",
+              "message": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "data-science:install-core-packages",
+      "type": "shell",
+      "command": "${input:virtualEnvName}/bin/python",
+      "args": [
+        "-m",
+        "pip",
+        "install",
+        "--upgrade",
+        "pip",
+        "wheel",
+        "setuptools",
+        "pandas",
+        "numpy",
+        "scikit-learn",
+        "matplotlib",
+        "seaborn",
+        "ydata-profiling",
+        "jupyter",
+        "sphinx"
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-Command",
+          "& \"${input:virtualEnvName}\\Scripts\\python.exe\" -m pip install --upgrade pip wheel setuptools pandas numpy scikit-learn matplotlib seaborn ydata-profiling jupyter sphinx"
+        ]
+      },
+      "dependsOn": "data-science:create-virtual-environment",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "pip-install",
+          "pattern": [
+            {
+              "regexp": "^ERROR: (.*)$",
+              "message": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "data-science:notebook-to-script",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "jupyter",
+        "nbconvert",
+        "--to",
+        "script",
+        "${input:notebookPath}"
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-Command",
+          "python -m jupyter nbconvert --to script ${input:notebookPath}"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "python-traceback",
+          "pattern": [
+            {
+              "regexp": "^  File \"([^\"]+)\", line (\\d+).*$",
+              "file": 1,
+              "line": 2
+            },
+            {
+              "regexp": "^    (.*)$",
+              "message": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "data-science:clean-notebook-outputs",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "jupyter",
+        "nbconvert",
+        "--clear-output",
+        "--inplace",
+        "${input:notebookPath}"
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-Command",
+          "python -m jupyter nbconvert --clear-output --inplace ${input:notebookPath}"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "python-traceback",
+          "pattern": [
+            {
+              "regexp": "^  File \"([^\"]+)\", line (\\d+).*$",
+              "file": 1,
+              "line": 2
+            },
+            {
+              "regexp": "^    (.*)$",
+              "message": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "data-science:generate-profiling-report",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "ydata_profiling",
+        "generate",
+        "${input:datasetPath}",
+        "--output",
+        "reports/data-profiling.html"
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-Command",
+          "python -m ydata_profiling generate ${input:datasetPath} --output reports/data-profiling.html"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "python-traceback",
+          "pattern": [
+            {
+              "regexp": "^  File \"([^\"]+)\", line (\\d+).*$",
+              "file": 1,
+              "line": 2
+            },
+            {
+              "regexp": "^    (.*)$",
+              "message": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "data-science:export-requirements",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "case ${input:requirementsExportFormat} in pip-freeze) source ${input:virtualEnvName}/bin/activate && pip freeze > requirements.txt ;; conda-env) conda env export --no-builds > environment.yml ;; pip-tools) pip-compile --generate-hashes ;; esac"
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-Command",
+          "$format = '${input:requirementsExportFormat}'; if ($format -eq 'pip-freeze') { . \"${input:virtualEnvName}\\Scripts\\Activate.ps1\"; pip freeze | Out-File -Encoding utf8 requirements.txt } elseif ($format -eq 'conda-env') { conda env export --no-builds | Out-File -Encoding utf8 environment.yml } else { pip-compile --generate-hashes }"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": [
+        {
+          "owner": "pip-install",
+          "pattern": [
+            {
+              "regexp": "^ERROR: (.*)$",
+              "message": 1
+            }
+          ]
+        },
+        {
+          "owner": "python-traceback",
+          "pattern": [
+            {
+              "regexp": "^  File \"([^\"]+)\", line (\\d+).*$",
+              "file": 1,
+              "line": 2
+            },
+            {
+              "regexp": "^    (.*)$",
+              "message": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "data-science:run-pytest-coverage",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "pytest",
+        "--cov=src",
+        "--cov-report",
+        "term-missing",
+        "--cov-report",
+        "html:reports/coverage",
+        "tests"
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-Command",
+          "python -m pytest --cov=src --cov-report term-missing --cov-report html:reports/coverage tests"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "pytest",
+          "pattern": [
+            {
+              "regexp": "^E +([^:]+): (.*)$",
+              "message": 2
+            }
+          ]
+        },
+        {
+          "owner": "python-traceback",
+          "pattern": [
+            {
+              "regexp": "^  File \"([^\"]+)\", line (\\d+).*$",
+              "file": 1,
+              "line": 2
+            },
+            {
+              "regexp": "^    (.*)$",
+              "message": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "data-science:profile-code",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "cProfile",
+        "-o",
+        "${input:profilingOutput}",
+        "main.py"
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-Command",
+          "python -m cProfile -o ${input:profilingOutput} main.py"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "python-traceback",
+          "pattern": [
+            {
+              "regexp": "^  File \"([^\"]+)\", line (\\d+).*$",
+              "file": 1,
+              "line": 2
+            },
+            {
+              "regexp": "^    (.*)$",
+              "message": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "data-science:generate-sphinx-docs",
+      "type": "shell",
+      "command": "sphinx-build",
+      "args": [
+        "-b",
+        "${input:sphinxBuilder}",
+        "docs/source",
+        "docs/build/${input:sphinxBuilder}"
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-Command",
+          "sphinx-build -b ${input:sphinxBuilder} docs/source docs/build/${input:sphinxBuilder}"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "sphinx",
+          "pattern": [
+            {
+              "regexp": "^(.+):(\\d+): (WARNING|ERROR): (.*)$",
+              "file": 1,
+              "line": 2,
+              "severity": 3,
+              "message": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "data-science:full-quality-gate",
+      "dependsOn": [
+        "data-science:create-virtual-environment",
+        "data-science:install-core-packages",
+        "data-science:notebook-to-script",
+        "data-science:clean-notebook-outputs",
+        "data-science:generate-profiling-report",
+        "data-science:run-pytest-coverage",
+        "data-science:profile-code",
+        "data-science:generate-sphinx-docs"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [
+        {
+          "owner": "python-traceback",
+          "pattern": [
+            {
+              "regexp": "^  File \"([^\"]+)\", line (\\d+).*$",
+              "file": 1,
+              "line": 2
+            },
+            {
+              "regexp": "^    (.*)$",
+              "message": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

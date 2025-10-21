@@ -1,0 +1,24 @@
+{
+  "_metadata": {
+    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
+    "version": "1.0.0",
+    "description": "Core VS Code settings optimized for productivity and accessibility.",
+    "compatibility": {
+      "vscode": ">=1.70.0"
+    }
+  },
+  "editor.fontLigatures": false,
+  "editor.fontSize": 14,
+  "editor.formatOnSave": true,
+  "editor.minimap.enabled": false,
+  "editor.rulers": [80, 120],
+  "editor.stickyScroll.enabled": true,
+  "files.autoSave": "off",
+  "files.trimTrailingWhitespace": true,
+  "terminal.integrated.fontFamily": "", 
+  "workbench.colorTheme": "Default Dark+",
+  "workbench.iconTheme": "material-icon-theme",
+  "accessibility.signals.visualAlerts.enabled": true,
+  "explorer.confirmDelete": false,
+  "python.analysis.typeCheckingMode": "basic"
+}

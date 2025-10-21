@@ -1,0 +1,54 @@
+<!--
+MIT License
+Copyright (c) 2025 Diogo Ribeiro
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" role="img" aria-labelledby="title desc">
+  <title id="title">Toolkit CLI audit screenshot</title>
+  <desc id="desc">Stylised representation of the toolkit CLI displaying an audit report.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1021"/>
+      <stop offset="100%" stop-color="#1d2a4b"/>
+    </linearGradient>
+    <style>
+      .terminal { font-family: 'Fira Code', 'Consolas', monospace; font-size: 18px; }
+      .prompt { fill: #7ef9ff; }
+      .command { fill: #ffffff; }
+      .output { fill: #9be7ff; }
+    </style>
+  </defs>
+  <rect width="960" height="540" fill="url(#bg)" rx="16" ry="16"/>
+  <rect x="40" y="40" width="880" height="460" fill="#141b2d" opacity="0.85" rx="12" ry="12"/>
+  <text class="terminal prompt" x="64" y="92">diogo@esmad</text>
+  <text class="terminal command" x="64" y="130">$ python -m toolkit.cli audit --workspace .</text>
+  <text class="terminal output" x="64" y="180">{</text>
+  <text class="terminal output" x="96" y="212">"workspace": "/home/diogo/projects/toolkit",</text>
+  <text class="terminal output" x="96" y="244">"configFindings": {</text>
+  <text class="terminal output" x="128" y="276">"settingsPresent": true,</text>
+  <text class="terminal output" x="128" y="308">"keybindingsPresent": true,</text>
+  <text class="terminal output" x="128" y="340">"missingFiles": []</text>
+  <text class="terminal output" x="96" y="372">},</text>
+  <text class="terminal output" x="96" y="404">"extensionCompliance": {</text>
+  <text class="terminal output" x="128" y="436">"recommendedMissing": [],</text>
+  <text class="terminal output" x="128" y="468">"unexpected": []</text>
+  <text class="terminal output" x="96" y="500">}</text>
+  <text class="terminal output" x="64" y="532">}</text>
+</svg>

@@ -1,0 +1,560 @@
+{
+  "_metadata": {
+    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
+    "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
+    "description": "General-purpose Python development tasks for linting, testing, security, and release automation.",
+    "version": "1.0.0"
+  },
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "pythonModule",
+      "type": "promptString",
+      "description": "Primary Python package or module to target",
+      "default": "src"
+    },
+    {
+      "id": "distributionOutput",
+      "type": "promptString",
+      "description": "Distribution directory for build artifacts",
+      "default": "dist"
+    },
+    {
+      "id": "dockerImageTag",
+      "type": "promptString",
+      "description": "Docker image tag (e.g. diogoribeiro7/vscode-productivity:latest)",
+      "default": "diogoribeiro7/vscode-productivity:latest"
+    },
+    {
+      "id": "gitCommitMessage",
+      "type": "promptString",
+      "description": "Conventional commit message for automation",
+      "default": "chore: automated workflow"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "python:lint-black",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "black",
+        "--check",
+        "--diff",
+        "${input:pythonModule}"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "-m",
+          "black",
+          "--check",
+          "--diff",
+          "${input:pythonModule}"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "black",
+          "pattern": [
+            {
+              "regexp": "^would reformat (.*)$",
+              "file": 1,
+              "message": 1
+            },
+            {
+              "regexp": "^error: (.*)$",
+              "message": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "python:lint-isort",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "isort",
+        "--check-only",
+        "--diff",
+        "${input:pythonModule}"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "-m",
+          "isort",
+          "--check-only",
+          "--diff",
+          "${input:pythonModule}"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "isort",
+          "pattern": [
+            {
+              "regexp": "^ERROR: (.*)$",
+              "message": 1
+            },
+            {
+              "regexp": "^(.*)\\s+Imports are incorrectly sorted.*$",
+              "file": 1,
+              "message": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "python:lint-flake8",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "flake8",
+        "${input:pythonModule}"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "-m",
+          "flake8",
+          "${input:pythonModule}"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "flake8",
+          "pattern": [
+            {
+              "regexp": "^(.+):(\\d+):(\\d+):\\s+([A-Z0-9]+)\\s+(.*)$",
+              "file": 1,
+              "line": 2,
+              "column": 3,
+              "code": 4,
+              "message": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "python:lint-pylint",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "pylint",
+        "${input:pythonModule}"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "-m",
+          "pylint",
+          "${input:pythonModule}"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "pylint",
+          "pattern": [
+            {
+              "regexp": "^(.*):(\\d+):(\\d+):\\s([A-Z])(\\d{4}):\\s(.*)$",
+              "file": 1,
+              "line": 2,
+              "column": 3,
+              "severity": 4,
+              "code": 5,
+              "message": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "python:lint-suite",
+      "dependsOn": [
+        "python:lint-black",
+        "python:lint-isort",
+        "python:lint-flake8",
+        "python:lint-pylint"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "python:type-check",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "mypy",
+        "${input:pythonModule}"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "-m",
+          "mypy",
+          "${input:pythonModule}"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "mypy",
+          "pattern": [
+            {
+              "regexp": "^(.+):(\\d+): (error|note): (.*)$",
+              "file": 1,
+              "line": 2,
+              "severity": 3,
+              "message": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "python:security-bandit",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "bandit",
+        "-r",
+        "${input:pythonModule}"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "-m",
+          "bandit",
+          "-r",
+          "${input:pythonModule}"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "bandit",
+          "pattern": [
+            {
+              "regexp": ">> Issue: \\[(HIGH|MEDIUM|LOW)\\] (.*)$",
+              "severity": 1,
+              "message": 2
+            }
+          ]
+        },
+        {
+          "owner": "python-traceback",
+          "pattern": [
+            {
+              "regexp": "^  File \"([^\"]+)\", line (\\d+).*$",
+              "file": 1,
+              "line": 2
+            },
+            {
+              "regexp": "^    (.*)$",
+              "message": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "python:security-pip-audit",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "pip_audit"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "-m",
+          "pip_audit"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": [
+        {
+          "owner": "pip-audit",
+          "pattern": [
+            {
+              "regexp": "^([^:]+): (\\S+) \\(([^)]+)\\) - (.*)$",
+              "file": 1,
+              "code": 2,
+              "message": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "python:build-distribution",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "build",
+        "--outdir",
+        "${input:distributionOutput}"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "-m",
+          "build",
+          "--outdir",
+          "${input:distributionOutput}"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "python-build",
+          "pattern": [
+            {
+              "regexp": "^ERROR (.*)$",
+              "message": 1
+            }
+          ]
+        },
+        {
+          "owner": "python-traceback",
+          "pattern": [
+            {
+              "regexp": "^  File \"([^\"]+)\", line (\\d+).*$",
+              "file": 1,
+              "line": 2
+            },
+            {
+              "regexp": "^    (.*)$",
+              "message": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "python:publish-wheel",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "twine",
+        "upload",
+        "${input:distributionOutput}/*"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "-m",
+          "twine",
+          "upload",
+          "${input:distributionOutput}/*"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "twine",
+          "pattern": [
+            {
+              "regexp": "^HTTPError: (.*)$",
+              "message": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "python:docker-build",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "build",
+        "-t",
+        "${input:dockerImageTag}",
+        "."
+      ],
+      "windows": {
+        "command": "docker",
+        "args": [
+          "build",
+          "-t",
+          "${input:dockerImageTag}",
+          "."
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "docker",
+          "pattern": [
+            {
+              "regexp": "^failed to (build|solve): (.*)$",
+              "message": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "python:docker-run",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-it",
+        "${input:dockerImageTag}"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "docker",
+          "pattern": [
+            {
+              "regexp": "^failed to (build|solve): (.*)$",
+              "message": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "python:git-prepare-commit",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "pre-commit run --all-files && git status"
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-Command",
+          "pre-commit run --all-files; git status"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "python:git-commit",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "git add -A && git commit -m \"${input:gitCommitMessage}\""
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-Command",
+          "git add -A; git commit -m '${input:gitCommitMessage}'"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "python:release-pipeline",
+      "dependsOn": [
+        "python:lint-suite",
+        "python:type-check",
+        "python:security-bandit",
+        "python:security-pip-audit",
+        "python:build-distribution",
+        "python:docker-build"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

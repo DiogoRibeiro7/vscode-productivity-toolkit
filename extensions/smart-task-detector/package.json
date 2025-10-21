@@ -1,0 +1,230 @@
+{
+  "_metadata": {
+    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
+    "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
+    "description": "Smart task detection extension for the VS Code Productivity Toolkit.",
+    "repository": "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit"
+  },
+  "name": "vscode-productivity-toolkit-smart-task-detector",
+  "displayName": "VS Code Productivity Toolkit - Smart Task Detector",
+  "publisher": "DiogoRibeiro7",
+  "version": "1.0.0",
+  "description": "Automatically detect project types and install curated tasks from the VS Code Productivity Toolkit.",
+  "license": "MIT",
+  "engines": {
+    "vscode": ">=1.70.0"
+  },
+  "categories": [
+    "Other",
+    "Productivity"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "workspaceContains:package.json",
+    "workspaceContains:requirements.txt",
+    "onCommand:vscode-productivity-toolkit.detectTasks",
+    "onCommand:vscode-productivity-toolkit.installRecommendedTasks",
+    "onCommand:vscode-productivity-toolkit.showRecommendations"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vscode-productivity-toolkit.detectTasks",
+        "title": "Toolkit: Detect Project Tasks",
+        "category": "VS Code Productivity Toolkit"
+      },
+      {
+        "command": "vscode-productivity-toolkit.installRecommendedTasks",
+        "title": "Toolkit: Install Recommended Tasks",
+        "category": "VS Code Productivity Toolkit"
+      },
+      {
+        "command": "vscode-productivity-toolkit.showRecommendations",
+        "title": "Toolkit: Show Task Recommendations",
+        "category": "VS Code Productivity Toolkit"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "VS Code Productivity Toolkit",
+      "properties": {
+        "vscodeProductivityToolkit.autoInstall": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically prompt to install recommended task configurations after detection."
+        },
+        "vscodeProductivityToolkit.statusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a status bar item summarizing detected task recommendations."
+        },
+        "vscodeProductivityToolkit.enableLogging": {
+          "type": "boolean",
+          "default": true,
+          "description": "Emit verbose diagnostics from the Smart Task Detector."
+        }
+      }
+    },
+    "problemMatchers": [
+      {
+        "name": "toolkit-black",
+        "label": "Black Formatter",
+        "owner": "python",
+        "fileLocation": [
+          "autoDetect"
+        ],
+        "pattern": {
+          "regexp": "^would reformat (.*)$",
+          "file": 1,
+          "message": 1
+        }
+      },
+      {
+        "name": "toolkit-isort",
+        "label": "isort Import Sorter",
+        "owner": "python",
+        "fileLocation": [
+          "autoDetect"
+        ],
+        "pattern": {
+          "regexp": "^(.*)\\\\s+- ERROR: (.*)$",
+          "file": 1,
+          "message": 2
+        }
+      },
+      {
+        "name": "toolkit-flake8",
+        "label": "Flake8 Linting",
+        "owner": "python",
+        "fileLocation": [
+          "autoDetect"
+        ],
+        "pattern": {
+          "regexp": "^(.*):(\\\\d+):(\\\\d+): (F|E|W)(\\\\d{3}) (.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "code": 4,
+          "message": 6
+        }
+      },
+      {
+        "name": "toolkit-pylint",
+        "label": "Pylint",
+        "owner": "python",
+        "fileLocation": [
+          "autoDetect"
+        ],
+        "pattern": {
+          "regexp": "^(.*):(\\\\d+):(\\\\d+): ([A-Z])(\\\\d{4}): (.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "code": 4,
+          "message": 6
+        }
+      },
+      {
+        "name": "toolkit-bandit",
+        "label": "Bandit Security Scanner",
+        "owner": "python",
+        "fileLocation": [
+          "autoDetect"
+        ],
+        "pattern": {
+          "regexp": "^>> Issue: .+?/(.*):(\\\\d+)\\\\s+\\\\[(HIGH|MEDIUM|LOW)\\\\]\\\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "message": 4
+        }
+      },
+      {
+        "name": "toolkit-pytest",
+        "label": "Pytest",
+        "owner": "python",
+        "fileLocation": [
+          "autoDetect"
+        ],
+        "pattern": {
+          "regexp": "^(.*):(\\\\d+): in (.*)$",
+          "file": 1,
+          "line": 2,
+          "message": 3
+        }
+      },
+      {
+        "name": "toolkit-mypy",
+        "label": "Mypy Type Checker",
+        "owner": "python",
+        "fileLocation": [
+          "autoDetect"
+        ],
+        "pattern": {
+          "regexp": "^(.*):(\\\\d+): (error): (.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "message": 4
+        }
+      },
+      {
+        "name": "toolkit-eslint",
+        "label": "ESLint",
+        "owner": "typescript",
+        "fileLocation": [
+          "autoDetect"
+        ],
+        "pattern": {
+          "regexp": "^(.*):(\\\\d+):(\\\\d+): (error|warning) (.*) \\\\[(.*)\\\\]$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5,
+          "code": 6
+        }
+      },
+      {
+        "name": "toolkit-jest",
+        "label": "Jest",
+        "owner": "typescript",
+        "fileLocation": [
+          "autoDetect"
+        ],
+        "pattern": {
+          "regexp": "^(FAIL|PASS) (.*)$",
+          "message": 0
+        }
+      },
+      {
+        "name": "toolkit-npm-audit",
+        "label": "npm Audit",
+        "owner": "typescript",
+        "fileLocation": [
+          "autoDetect"
+        ],
+        "pattern": {
+          "regexp": "^(.*)\\\\s+((Critical|High|Moderate|Low))\\\\s+(.*)$",
+          "file": 1,
+          "severity": 2,
+          "message": 4
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./tsconfig.json",
+    "lint": "eslint src --ext .ts",
+    "test": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.25",
+    "@types/vscode": "^1.70.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,25 @@
+[
+  {
+    "_metadata": {
+      "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
+      "version": "1.0.0",
+      "description": "Custom keybindings optimized for productivity while maintaining accessibility.",
+      "compatibility": {
+        "vscode": ">=1.70.0"
+      }
+    }
+  },
+  {
+    "key": "ctrl+alt+f",
+    "command": "editor.action.formatDocument",
+    "when": "editorHasDocumentFormattingProvider && editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "ctrl+alt+l",
+    "command": "workbench.action.toggleSidebarVisibility"
+  },
+  {
+    "key": "ctrl+shift+alt+t",
+    "command": "testing.runAll"
+  }
+]

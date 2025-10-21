@@ -1,0 +1,46 @@
+{
+  "_metadata": {
+    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
+    "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
+    "description": "Semantic Release configuration for the VS Code Productivity Toolkit."
+  },
+  "branches": [
+    "main",
+    {
+      "name": "beta",
+      "prerelease": true
+    }
+  ],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "CHANGELOG.md"
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {
+            "path": "extensions/smart-task-detector/dist/extension.js",
+            "label": "Smart Task Detector (compiled)"
+          }
+        ]
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": [
+          "CHANGELOG.md",
+          "requirements.txt",
+          "extensions/smart-task-detector/package.json",
+          "extensions/smart-task-detector/dist/extension.js"
+        ]
+      }
+    ]
+  ]
+}

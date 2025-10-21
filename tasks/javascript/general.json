@@ -1,0 +1,351 @@
+{
+  "_metadata": {
+    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
+    "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
+    "description": "VS Code tasks for JavaScript and TypeScript quality automation, package management, and documentation workflows.",
+    "version": "1.0.0"
+  },
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "coverageThreshold",
+      "type": "promptString",
+      "description": "Minimum acceptable coverage percentage",
+      "default": "85"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "javascript:lint",
+      "detail": "Run ESLint across the workspace",
+      "type": "shell",
+      "command": "npx",
+      "windows": {
+        "command": "npx.cmd"
+      },
+      "args": [
+        "eslint",
+        ".",
+        "--max-warnings",
+        "0"
+      ],
+      "problemMatcher": [
+        "$eslint-stylish"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "javascript:format",
+      "detail": "Format files using Prettier",
+      "type": "shell",
+      "command": "npx",
+      "windows": {
+        "command": "npx.cmd"
+      },
+      "args": [
+        "prettier",
+        "--write",
+        "."
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "javascript:install-npm",
+      "detail": "Install dependencies using npm",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "install"
+      ],
+      "problemMatcher": [
+        "$npm-install"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "javascript:install-yarn",
+      "detail": "Install dependencies using Yarn",
+      "type": "shell",
+      "command": "yarn",
+      "windows": {
+        "command": "yarn.cmd"
+      },
+      "args": [
+        "install"
+      ],
+      "problemMatcher": [
+        "$yarn-install"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "javascript:install-pnpm",
+      "detail": "Install dependencies using pnpm",
+      "type": "shell",
+      "command": "pnpm",
+      "windows": {
+        "command": "pnpm.cmd"
+      },
+      "args": [
+        "install"
+      ],
+      "problemMatcher": [
+        "$pnpm-install"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "javascript:typecheck",
+      "detail": "Compile TypeScript without emitting output",
+      "type": "shell",
+      "command": "npx",
+      "windows": {
+        "command": "npx.cmd"
+      },
+      "args": [
+        "tsc",
+        "--noEmit"
+      ],
+      "problemMatcher": [
+        "$tsc"
+      ],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "javascript:test-unit",
+      "detail": "Run unit tests using the configured test runner",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "run",
+        "test",
+        "--",
+        "--runInBand",
+        "--watchAll=false"
+      ],
+      "problemMatcher": [
+        "$jest-watch"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "javascript:test-integration",
+      "detail": "Execute integration tests using npm scripts",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "run",
+        "test:integration"
+      ],
+      "problemMatcher": [
+        "$mocha-summary"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "javascript:coverage",
+      "detail": "Generate coverage report and enforce minimum threshold",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "run",
+        "test:coverage",
+        "--",
+        "--coverageThreshold",
+        "global.total=${input:coverageThreshold}"
+      ],
+      "problemMatcher": [
+        "$jest-watch"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "javascript:docs",
+      "detail": "Build project documentation using the configured generator",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "run",
+        "docs"
+      ],
+      "problemMatcher": [
+        "$typedoc"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "javascript:dependency-update",
+      "detail": "Check and update outdated dependencies",
+      "type": "shell",
+      "command": "npx",
+      "windows": {
+        "command": "npx.cmd"
+      },
+      "args": [
+        "npm-check-updates",
+        "--upgrade"
+      ],
+      "problemMatcher": [
+        "$ncu"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "javascript:vulnerability-fix",
+      "detail": "Attempt automated remediation of vulnerabilities",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "audit",
+        "fix",
+        "--force"
+      ],
+      "problemMatcher": [
+        "$npm-audit"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "javascript:verify",
+      "detail": "Run the full JavaScript quality gate",
+      "type": "shell",
+      "command": "echo",
+      "args": [
+        "JavaScript verification complete"
+      ],
+      "dependsOn": [
+        "javascript:lint",
+        "javascript:typecheck",
+        "javascript:test-unit",
+        "javascript:test-integration",
+        "javascript:coverage"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "never",
+        "panel": "shared",
+        "clear": false
+      }
+    }
+  ],
+  "problemMatchers": [
+    {
+      "name": "$npm-install",
+      "owner": "npm",
+      "fileLocation": "absolute",
+      "pattern": {
+        "regexp": "^npm ERR! (.*)$",
+        "message": 1
+      }
+    },
+    {
+      "name": "$yarn-install",
+      "owner": "npm",
+      "fileLocation": "absolute",
+      "pattern": {
+        "regexp": "^error (.*)$",
+        "message": 1
+      }
+    },
+    {
+      "name": "$pnpm-install",
+      "owner": "npm",
+      "fileLocation": "absolute",
+      "pattern": {
+        "regexp": "^\u001b\\[[0-9;]*m?ERR_PNPM\u001b\\[[0-9;]*m?\\s*(.*)$",
+        "message": 1
+      }
+    },
+    {
+      "name": "$typedoc",
+      "owner": "typescript",
+      "fileLocation": [
+        "relative",
+        "${workspaceFolder}"
+      ],
+      "pattern": {
+        "regexp": "^Error: (.*) in (.*):(\\d+):(\\d+)$",
+        "message": 1,
+        "file": 2,
+        "line": 3,
+        "column": 4
+      }
+    },
+    {
+      "name": "$ncu",
+      "owner": "npm",
+      "fileLocation": "absolute",
+      "pattern": {
+        "regexp": "^\\s*\\*\\s*(.*)$",
+        "message": 1
+      }
+    }
+  ]
+}

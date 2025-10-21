@@ -1,0 +1,289 @@
+{
+  "_metadata": {
+    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
+    "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
+    "description": "VS Code tasks for Node.js backend workflows including database operations, testing, security, and release automation.",
+    "version": "1.0.0"
+  },
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "nodeEntryPoint",
+      "type": "promptString",
+      "description": "Entry point file for the Node.js service",
+      "default": "src/index.ts"
+    },
+    {
+      "id": "apiCollection",
+      "type": "promptString",
+      "description": "Postman or Hoppscotch collection file for API tests",
+      "default": "tests/api/collection.json"
+    },
+    {
+      "id": "dockerImageTag",
+      "type": "promptString",
+      "description": "Docker image tag for the service",
+      "default": "diogoribeiro7/vscode-productivity-node:latest"
+    },
+    {
+      "id": "npmPublishTag",
+      "type": "promptString",
+      "description": "Release tag to use when publishing to npm",
+      "default": "latest"
+    },
+    {
+      "id": "auditLevel",
+      "type": "promptString",
+      "description": "Minimum vulnerability level for npm audit (low|moderate|high|critical)",
+      "default": "moderate"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "node:dev-server",
+      "detail": "Start Express or Fastify development server with live reload",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "run",
+        "dev"
+      ],
+      "isBackground": true,
+      "problemMatcher": [
+        "$tsc-watch"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      }
+    },
+    {
+      "label": "node:db-migrate",
+      "detail": "Apply database migrations using the configured ORM",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "run",
+        "migrate"
+      ],
+      "problemMatcher": [
+        "$node-stacktrace"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "node:db-seed",
+      "detail": "Seed the database with deterministic data",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "run",
+        "seed"
+      ],
+      "problemMatcher": [
+        "$node-stacktrace"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "node:api-test",
+      "detail": "Run API integration tests via Newman or other CLI tooling",
+      "type": "shell",
+      "command": "npx",
+      "windows": {
+        "command": "npx.cmd"
+      },
+      "args": [
+        "newman",
+        "run",
+        "${input:apiCollection}",
+        "--env-var",
+        "baseUrl=http://localhost:3000",
+        "--color"
+      ],
+      "problemMatcher": [
+        "$newman"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "node:docker-build",
+      "detail": "Build and tag a Docker image for the Node.js service",
+      "type": "shell",
+      "command": "docker",
+      "windows": {
+        "command": "docker.exe"
+      },
+      "args": [
+        "build",
+        "--file",
+        "Dockerfile",
+        "--tag",
+        "${input:dockerImageTag}",
+        "."
+      ],
+      "problemMatcher": [
+        "$docker"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "node:npm-publish",
+      "detail": "Publish the package to npm with provenance checks",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "publish",
+        "--access",
+        "public",
+        "--tag",
+        "${input:npmPublishTag}",
+        "--provenance"
+      ],
+      "problemMatcher": [
+        "$npm-publish"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "node:security-audit",
+      "detail": "Audit dependencies for known vulnerabilities",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "audit",
+        "--production",
+        "--audit-level",
+        "${input:auditLevel}"
+      ],
+      "problemMatcher": [
+        "$npm-audit"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "node:profile",
+      "detail": "Profile server performance using Clinic Flame",
+      "type": "shell",
+      "command": "npx",
+      "windows": {
+        "command": "npx.cmd"
+      },
+      "args": [
+        "clinic",
+        "flame",
+        "--on-port",
+        "'ready'",
+        "--",
+        "node",
+        "${input:nodeEntryPoint}"
+      ],
+      "problemMatcher": [
+        "$node-stacktrace"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    }
+  ],
+  "problemMatchers": [
+    {
+      "name": "$node-stacktrace",
+      "owner": "node",
+      "fileLocation": [
+        "relative",
+        "${workspaceFolder}"
+      ],
+      "pattern": {
+        "regexp": "^\\s*at\\s+(?:.*\\()?(.+):(\\d+):(\\d+)\\)?$",
+        "file": 1,
+        "line": 2,
+        "column": 3
+      }
+    },
+    {
+      "name": "$docker",
+      "owner": "docker",
+      "fileLocation": "absolute",
+      "pattern": {
+        "regexp": "^unable to (.*)$",
+        "message": 1
+      }
+    },
+    {
+      "name": "$npm-publish",
+      "owner": "npm",
+      "fileLocation": "absolute",
+      "pattern": {
+        "regexp": "^npm ERR! (.*)$",
+        "message": 1
+      }
+    },
+    {
+      "name": "$npm-audit",
+      "owner": "npm",
+      "fileLocation": "absolute",
+      "pattern": {
+        "regexp": "^# npm audit (.*)$",
+        "message": 1
+      }
+    },
+    {
+      "name": "$newman",
+      "owner": "test",
+      "fileLocation": [
+        "relative",
+        "${workspaceFolder}"
+      ],
+      "pattern": {
+        "regexp": "^\u2716\\s+([^:]+):(\\d+)(?::(\\d+))?\\s+-\\s+(.*)$",
+        "file": 1,
+        "line": 2,
+        "column": 3,
+        "message": 4
+      }
+    }
+  ]
+}

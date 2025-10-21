@@ -1,0 +1,273 @@
+{
+  "_metadata": {
+    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
+    "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
+    "description": "VS Code tasks for React and TypeScript workflows including scaffolding, testing, and performance auditing.",
+    "version": "1.0.0"
+  },
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "reactComponentName",
+      "type": "promptString",
+      "description": "Name of the React component to generate (PascalCase recommended)",
+      "default": "SampleComponent"
+    },
+    {
+      "id": "storybookPort",
+      "type": "promptString",
+      "description": "Port to expose Storybook UI",
+      "default": "6006"
+    },
+    {
+      "id": "bundleAnalyzerPort",
+      "type": "promptString",
+      "description": "Port for bundle analyzer server",
+      "default": "8888"
+    },
+    {
+      "id": "pwaAuditUrl",
+      "type": "promptString",
+      "description": "URL to audit for PWA readiness",
+      "default": "http://localhost:3000"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "react:create-component",
+      "detail": "Scaffold a TypeScript React component using the local project generator",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "run",
+        "generate:component",
+        "--",
+        "--name",
+        "${input:reactComponentName}",
+        "--language",
+        "ts"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "react:dev-server",
+      "detail": "Launch the React development server with hot module replacement",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "run",
+        "dev"
+      ],
+      "isBackground": true,
+      "problemMatcher": [
+        "$tsc-watch"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      }
+    },
+    {
+      "label": "react:lint",
+      "detail": "Run ESLint with TypeScript configuration",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "run",
+        "lint"
+      ],
+      "problemMatcher": [
+        "$eslint-stylish"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "react:type-check",
+      "detail": "Run TypeScript compiler in noEmit mode",
+      "type": "shell",
+      "command": "npx",
+      "windows": {
+        "command": "npx.cmd"
+      },
+      "args": [
+        "tsc",
+        "--noEmit"
+      ],
+      "problemMatcher": [
+        "$tsc"
+      ],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "react:build",
+      "detail": "Create optimized production bundle",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "run",
+        "build"
+      ],
+      "dependsOn": [
+        "react:lint",
+        "react:type-check"
+      ],
+      "problemMatcher": [
+        "$tsc"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "react:storybook",
+      "detail": "Serve Storybook with hot reload",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "run",
+        "storybook",
+        "--",
+        "--port",
+        "${input:storybookPort}"
+      ],
+      "isBackground": true,
+      "problemMatcher": [
+        "$tsc-watch"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      }
+    },
+    {
+      "label": "react:test-components",
+      "detail": "Execute component tests with Jest and React Testing Library",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "run",
+        "test",
+        "--",
+        "--watchAll=false",
+        "--runInBand"
+      ],
+      "problemMatcher": [
+        "$jest-watch"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "react:bundle-analyze",
+      "detail": "Inspect bundle composition using source-map-explorer or webpack analyzer",
+      "type": "shell",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "run",
+        "analyze",
+        "--",
+        "--port",
+        "${input:bundleAnalyzerPort}"
+      ],
+      "problemMatcher": [
+        "$webpack"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "react:pwa-audit",
+      "detail": "Run Lighthouse PWA audit via npx",
+      "type": "shell",
+      "command": "npx",
+      "windows": {
+        "command": "npx.cmd"
+      },
+      "args": [
+        "lighthouse",
+        "${input:pwaAuditUrl}",
+        "--view",
+        "--only-categories=pwa",
+        "--chrome-flags=--headless"
+      ],
+      "problemMatcher": [
+        "$lighthousePwa"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    }
+  ],
+  "problemMatchers": [
+    {
+      "name": "$webpack",
+      "owner": "javascript",
+      "fileLocation": [
+        "relative",
+        "${workspaceFolder}"
+      ],
+      "pattern": {
+        "regexp": "^ERROR in (.*):(\\d+):(\\d+)\\s-\\s(.*)$",
+        "file": 1,
+        "line": 2,
+        "column": 3,
+        "message": 4
+      }
+    },
+    {
+      "name": "$lighthousePwa",
+      "owner": "report",
+      "fileLocation": "absolute",
+      "pattern": {
+        "regexp": "^\u2717?\\s*PWA\\s+score:\\s+(.*)$",
+        "message": 1
+      }
+    }
+  ]
+}

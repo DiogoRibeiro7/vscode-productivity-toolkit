@@ -1,0 +1,99 @@
+# MIT License
+
+# Copyright (c) 2025 Diogo Ribeiro
+
+#
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+
+# of this software and associated documentation files (the "Software"), to deal
+
+# in the Software without restriction, including without limitation the rights
+
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+
+# copies of the Software, and to permit persons to whom the Software is
+
+# furnished to do so, subject to the following conditions:
+
+#
+
+# The above copyright notice and this permission notice shall be included in all
+
+# copies or substantial portions of the Software.
+
+#
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+
+# SOFTWARE.
+
+# CODEOWNERS file for VS Code Productivity Toolkit
+
+# <https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners>
+
+# Global ownership - all files require review from the project maintainer
+
+- @DiogoRibeiro7
+
+# Core Python modules - require maintainer review
+
+/toolkit/ @DiogoRibeiro7 /tasks/python/ @DiogoRibeiro7 /qa/ @DiogoRibeiro7
+
+# Smart Task Detector extension - TypeScript/JavaScript expertise needed
+
+/extensions/smart-task-detector/ @DiogoRibeiro7
+
+# Task collections - domain expertise recommended
+
+/tasks/javascript/ @DiogoRibeiro7 /tasks/docker/ @DiogoRibeiro7 /tasks/git/ @DiogoRibeiro7 /tasks/general/ @DiogoRibeiro7
+
+# Installation scripts - cross-platform testing required
+
+/scripts/ @DiogoRibeiro7
+
+# Configuration and settings
+
+/settings/ @DiogoRibeiro7 /.vscode/ @DiogoRibeiro7
+
+# CI/CD and automation
+
+/.github/ @DiogoRibeiro7 /pytest.ini @DiogoRibeiro7 /pyproject.toml @DiogoRibeiro7 /.pre-commit-config.yaml @DiogoRibeiro7 /.gitignore @DiogoRibeiro7
+
+# Documentation - technical writing review
+
+/docs/ @DiogoRibeiro7 /README.md @DiogoRibeiro7 /CHANGELOG.md @DiogoRibeiro7
+
+# Security and community files - require careful review
+
+/SECURITY.md @DiogoRibeiro7 /CONTRIBUTING.md @DiogoRibeiro7 /CODE_OF_CONDUCT.md @DiogoRibeiro7 /LICENSE @DiogoRibeiro7
+
+# Package configuration - affects distribution
+
+/requirements.txt @DiogoRibeiro7 /setup.py @DiogoRibeiro7 /MANIFEST.in @DiogoRibeiro7
+
+# Examples and templates - require validation
+
+/examples/ @DiogoRibeiro7 /snippets/ @DiogoRibeiro7
+
+# Test suite - quality assurance critical
+
+/tests/ @DiogoRibeiro7
+
+# Release and semantic versioning
+
+/.releaserc.json @DiogoRibeiro7
+
+# Dependency management
+
+/.github/dependabot.yml @DiogoRibeiro7

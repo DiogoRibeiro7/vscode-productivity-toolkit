@@ -1,0 +1,220 @@
+# MIT License
+# Copyright (c) 2025 Diogo Ribeiro
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: ['--unsafe']  # Allow custom YAML tags
+      - id: check-json
+      - id: check-toml
+      - id: check-xml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: fix-byte-order-marker
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Python code formatting and linting
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
+    hooks:
+      - id: black
+        language_version: python3
+        args: ['--line-length=100']
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ['--profile', 'black', '--line-length=100']
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        args: ['--max-line-length=100', '--extend-ignore=E203,W503']
+        additional_dependencies:
+          - flake8-docstrings
+          - flake8-bugbear
+          - flake8-comprehensions
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-all]
+        args: ['--ignore-missing-imports']
+        exclude: ^(tests/|examples/)
+
+  # Security scanning
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: ['-r', 'toolkit', 'qa', 'scripts']
+        exclude: ^tests/
+
+  # Documentation and spelling
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.6
+    hooks:
+      - id: codespell
+        args: ['--skip=*.lock,*.svg,node_modules,*.min.js']
+        exclude: ^(\.git/|\.vscode/|node_modules/|\.pytest_cache/)
+
+  # Shell script linting
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.6
+    hooks:
+      - id: shellcheck
+        args: ['--severity=warning']
+        files: \.(sh|bash)$
+
+  # PowerShell script analysis
+  - repo: https://github.com/Infisical/pre-commit-powershell
+    rev: 'v0.1.0'
+    hooks:
+      - id: powershell-scriptanalyzer
+        files: \.ps1$
+
+  # JavaScript/TypeScript linting and formatting
+  - repo: local
+    hooks:
+      - id: eslint-smart-task-detector
+        name: ESLint (Smart Task Detector)
+        entry: bash -c 'cd extensions/smart-task-detector && npm run lint'
+        language: system
+        files: ^extensions/smart-task-detector/.*\.(ts|js)$
+        pass_filenames: false
+        require_serial: true
+
+      - id: typescript-compile
+        name: TypeScript Compile (Smart Task Detector)
+        entry: bash -c 'cd extensions/smart-task-detector && npm run compile'
+        language: system
+        files: ^extensions/smart-task-detector/.*\.ts$
+        pass_filenames: false
+        require_serial: true
+
+  # JSON/YAML validation
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.27.4
+    hooks:
+      - id: check-jsonschema
+        name: "Validate VS Code tasks.json files"
+        files: ^tasks/.*\.json$
+        args: ['--schemafile', 'qa/task_schema.json']
+
+      - id: check-jsonschema
+        name: "Validate package.json files"
+        files: package\.json$
+        args: ['--builtin-schema', 'package']
+
+      - id: check-jsonschema
+        name: "Validate GitHub Workflows"
+        files: ^\.github/workflows/.*\.ya?ml$
+        args: ['--builtin-schema', 'github-workflows']
+
+      - id: check-jsonschema
+        name: "Validate Dependabot config"
+        files: ^\.github/dependabot\.ya?ml$
+        args: ['--builtin-schema', 'dependabot']
+
+  # Python import sorting and optimization
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.15.0
+    hooks:
+      - id: pyupgrade
+        args: ['--py38-plus']
+
+  # Remove unused imports
+  - repo: https://github.com/PyCQA/autoflake
+    rev: v2.2.1
+    hooks:
+      - id: autoflake
+        args:
+          - --in-place
+          - --remove-all-unused-imports
+          - --remove-unused-variables
+          - --remove-duplicate-keys
+          - --ignore-init-module-imports
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.38.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix']
+        exclude: ^(CHANGELOG\.md|node_modules/)
+
+  # Git commit message validation
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.0.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: [feat, fix, docs, style, refactor, test, chore, ci, build]
+
+  # File size and performance checks
+  - repo: local
+    hooks:
+      - id: check-task-performance
+        name: Validate task loading performance
+        entry: python -m pytest tests/test_performance_benchmarks.py -v
+        language: system
+        files: ^(tasks/.*\.json|qa/.*\.py)$
+        pass_filenames: false
+
+  # Documentation link checking
+  - repo: local
+    hooks:
+      - id: check-documentation-links
+        name: Validate documentation links
+        entry: python -m pytest tests/test_documentation_quality.py::test_relative_links_resolve -v
+        language: system
+        files: ^(docs/.*\.md|README\.md|examples/.*\.md)$
+        pass_filenames: false
+
+# Global configuration
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: monthly
+  skip: []
+  submodules: false

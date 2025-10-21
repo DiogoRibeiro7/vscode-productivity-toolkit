@@ -1,0 +1,251 @@
+# MIT License
+# Copyright (c) 2025 Diogo Ribeiro
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vscode-productivity-toolkit"
+version = "1.0.0"
+description = "Enterprise-grade VS Code automation toolkit with curated tasks, settings, and smart project detection"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Diogo Ribeiro", email = "dfr@esmad.ipp.pt"},
+]
+maintainers = [
+    {name = "Diogo Ribeiro", email = "dfr@esmad.ipp.pt"},
+]
+keywords = [
+    "vscode",
+    "productivity",
+    "automation",
+    "development-tools",
+    "task-automation",
+    "developer-experience",
+    "enterprise",
+    "python",
+    "javascript",
+    "data-science"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: JavaScript",
+    "Programming Language :: TypeScript",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Text Editors",
+    "Topic :: Utilities",
+    "Environment :: Console",
+    "Framework :: Pytest",
+]
+dependencies = [
+    "pytest>=7.4,<8.0",
+    "pytest-cov>=4.1,<5.0",
+    "jsonschema>=4.19,<5.0",
+    "bandit>=1.7,<2.0",
+    "codespell>=2.2,<3.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit"
+Documentation = "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit/tree/main/docs"
+Repository = "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit.git"
+"Bug Reports" = "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit/issues"
+"Feature Requests" = "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit/discussions"
+Changelog = "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit/blob/main/CHANGELOG.md"
+Funding = "mailto:dfr@esmad.ipp.pt"
+
+[project.optional-dependencies]
+dev = [
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+    "tox>=4.0.0",
+]
+test = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "pytest-xdist>=3.0",
+    "coverage[toml]>=7.0",
+]
+docs = [
+    "sphinx>=6.0.0",
+    "sphinx-rtd-theme>=1.3.0",
+    "myst-parser>=2.0.0",
+]
+security = [
+    "bandit[toml]>=1.7.0",
+    "safety>=2.3.0",
+    "pip-audit>=2.6.0",
+]
+all = [
+    "vscode-productivity-toolkit[dev,test,docs,security]"
+]
+
+[project.scripts]
+vscode-toolkit = "toolkit.cli:main"
+productivity-toolkit = "toolkit.cli:main"
+
+[project.entry-points."console_scripts"]
+vscode-productivity-toolkit = "toolkit.cli:main"
+
+# Tool configurations
+[tool.setuptools]
+packages = ["toolkit", "tasks", "qa"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.yaml", "*.yml", "*.md", "*.txt"]
+"tasks" = ["**/*.json"]
+"settings" = ["*.json"]
+"qa" = ["*.json"]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["tests/*", "*.pyc", "__pycache__/*"]
+
+# Testing configuration
+[tool.pytest.ini_options]
+minversion = "7.4"
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=toolkit",
+    "--cov=qa",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-fail-under=80",
+]
+testpaths = ["tests"]
+markers = [
+    "integration: marks tests as integration tests (deselect with '-m \"not integration\"')",
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "network: marks tests that require network access",
+]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["toolkit", "qa"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+    "setup.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+# Code formatting and linting
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | node_modules
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+known_first_party = ["toolkit", "tasks", "qa"]
+known_third_party = ["pytest", "jsonschema"]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_optional = true
+disallow_any_generics = true
+disallow_subclassing_any = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
+
+# Security scanning
+[tool.bandit]
+exclude_dirs = ["tests", "node_modules", ".venv", "venv"]
+skips = ["B101", "B601"]  # Skip assert_used and shell=True warnings for legitimate cases
+
+[tool.bandit.assert_used]
+skips = ["*_test.py", "test_*.py", "*/tests/*"]

@@ -49,7 +49,7 @@ jobs:
         run: npm install --prefix extensions/smart-task-detector
 
       - name: Semantic release
-        uses: cycjimmy/semantic-release-action@v4
+        uses: cycjimmy/semantic-release-action@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

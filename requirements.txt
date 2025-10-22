@@ -32,7 +32,7 @@ rich>=13.0.0,<14.0.0         # Rich text and beautiful formatting
 typer>=0.9.0,<1.0.0          # Alternative CLI framework (optional)
 
 # Development server dependencies (optional)
-watchdog>=3.0.0,<4.0.0       # File system monitoring
+watchdog>=3.0.0,<7.0.0       # File system monitoring
 livereload>=2.6.0,<3.0.0     # Live reload for development
 
 # Compatibility and utility packages

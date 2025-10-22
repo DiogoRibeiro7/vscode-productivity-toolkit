@@ -88,7 +88,7 @@ docs = [
     "mkdocs-include-markdown-plugin>=6.0.0,<7.0.0"
 ]
 server = [
-    "watchdog>=3.0.0,<4.0.0",
+    "watchdog>=3.0.0,<7.0.0",
     "livereload>=2.6.0,<3.0.0"
 ]
 

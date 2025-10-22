@@ -1,0 +1,81 @@
+{
+  "_fileLocation": "/",
+  "name": "vscode-productivity-toolkit",
+  "version": "1.0.0",
+  "description": "Enterprise-grade VS Code automation toolkit with curated tasks, smart project detection, and seamless integration",
+  "main": "index.js",
+  "private": true,
+  "workspaces": [
+    "extensions/smart-task-detector"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm run install:extension",
+    "install:extension": "cd extensions/smart-task-detector && npm install",
+    "build": "npm run build:extension",
+    "build:extension": "cd extensions/smart-task-detector && npm run compile",
+    "package:extension": "cd extensions/smart-task-detector && npm run package",
+    "test": "npm run test:python && npm run test:extension",
+    "test:python": "python -m pytest tests/ -v",
+    "test:extension": "cd extensions/smart-task-detector && npm test",
+    "lint": "npm run lint:python && npm run lint:extension",
+    "lint:python": "python -m flake8 toolkit/ tests/",
+    "lint:extension": "cd extensions/smart-task-detector && npm run lint",
+    "format": "npm run format:python && npm run format:extension",
+    "format:python": "python -m black toolkit/ tests/ && python -m isort toolkit/ tests/",
+    "format:extension": "cd extensions/smart-task-detector && npm run format",
+    "clean": "npm run clean:python && npm run clean:extension",
+    "clean:python": "find . -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true",
+    "clean:extension": "cd extensions/smart-task-detector && npm run clean",
+    "docs:build": "mkdocs build",
+    "docs:serve": "mkdocs serve",
+    "release": "semantic-release",
+    "security:audit": "npm audit && python -m bandit -r toolkit/",
+    "bootstrap": "python scripts/bootstrap-workspace.py",
+    "validate": "python toolkit/cli.py validate"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit.git"
+  },
+  "keywords": [
+    "vscode",
+    "productivity",
+    "automation",
+    "development-tools",
+    "python",
+    "javascript",
+    "react",
+    "nodejs",
+    "docker",
+    "git",
+    "data-science",
+    "enterprise",
+    "quality-assurance",
+    "linting",
+    "testing",
+    "ci-cd"
+  ],
+  "author": {
+    "name": "Diogo Ribeiro",
+    "email": "dfr@esmad.ipp.pt",
+    "url": "https://orcid.org/0009-0001-2022-7072"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit/issues"
+  },
+  "homepage": "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit#readme",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0",
+    "python": ">=3.8"
+  },
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "semantic-release": "^22.0.0"
+  },
+  "optionalDependencies": {
+    "mkdocs": "^1.4.0"
+  }
+}

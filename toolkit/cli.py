@@ -1,249 +1,304 @@
 """
+# File Location: /toolkit/
 MIT License
 Copyright (c) 2025 Diogo Ribeiro
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-Command-line interface for the vscode-productivity-toolkit.
+Command-line interface for the VS Code Productivity Toolkit.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import shutil
-import subprocess
+import logging
+import sys
 from pathlib import Path
-from typing import Iterable, List
+from typing import List, Optional
 
-from tasks.python.workspace_audit import WorkspaceAuditor
-from toolkit.logging import configure_logging, get_logger
+from .detector import ProjectDetector
+from .installer import TaskInstaller
+from .utils import setup_logging, validate_workspace, TaskCategory
 
-DEFAULT_TIMEOUT_SECONDS = 25
-
-
-def loadExtensions(extensions_file: Path) -> List[str]:
-    """Load extension recommendations from a JSON file."""
-
-    if not extensions_file.exists():
-        raise FileNotFoundError(f"Extensions file not found: {extensions_file}")
-    with extensions_file.open("r", encoding="utf-8") as handle:
-        content = json.load(handle)
-    recommendations = content.get("recommendations", [])
-    if not isinstance(recommendations, list):
-        raise ValueError("The recommendations field must be an array.")
-    return [str(extension) for extension in recommendations]
+# Configure logging
+logger = logging.getLogger(__name__)
 
 
-def auditWorkspace(args: argparse.Namespace) -> None:
-    """Run the workspace auditor and optionally persist the report."""
-
-    logger = get_logger("toolkit.audit")
-    workspace_path = Path(args.workspace).expanduser().resolve()
-    extensions_file = Path(args.extensions).expanduser().resolve()
-    try:
-        recommended_extensions = loadExtensions(extensions_file)
-    except (OSError, ValueError) as error:
-        logger.error("Failed to load extensions", extra={"extra": {"error": str(error)}})
-        raise
-
-    auditor = WorkspaceAuditor(
-        workspace_path=workspace_path, recommended_extensions=recommended_extensions
-    )
-    report = auditor.run()
-    if args.output:
-        output_path = Path(args.output).expanduser().resolve()
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        with output_path.open("w", encoding="utf-8") as handle:
-            json.dump(report, handle, indent=2)
-        logger.info("Audit report saved", extra={"extra": {"path": str(output_path)}})
-    else:
-        print(json.dumps(report, indent=2))
-
-
-def configureWorkspace(args: argparse.Namespace) -> None:
-    """Export curated configuration files to a destination directory."""
-
-    logger = get_logger("toolkit.configure")
-    destination = Path(args.output).expanduser().resolve()
-    destination.mkdir(parents=True, exist_ok=True)
-    config_dir = Path(__file__).resolve().parents[1] / "settings"
-    files_to_copy = [
-        config_dir / "settings.json",
-        config_dir / "keybindings.json",
-        config_dir / "extensions.json",
-    ]
-    for file_path in files_to_copy:
-        if not file_path.exists():
-            logger.error(
-                "Configuration file missing", extra={"extra": {"path": str(file_path)}}
-            )
-            raise FileNotFoundError(f"Configuration file missing: {file_path}")
-        target_path = destination / file_path.name
-        if target_path.exists() and not args.force:
-            logger.warning(
-                "File already exists", extra={"extra": {"path": str(target_path)}}
-            )
-            continue
-        try:
-            shutil.copy2(file_path, target_path)
-        except OSError as error:
-            logger.error(
-                "Failed to copy configuration",
-                extra={"extra": {"source": str(file_path), "target": str(target_path)}},
-            )
-            raise error
-        logger.info(
-            "Configuration exported",
-            extra={"extra": {"source": str(file_path), "target": str(target_path)}},
-        )
-
-
-def manageExtensions(args: argparse.Namespace) -> None:
-    """Install recommended extensions using the VS Code CLI."""
-
-    logger = get_logger("toolkit.extensions")
-    extensions_file = Path(args.extensions).expanduser().resolve()
-    try:
-        extensions = loadExtensions(extensions_file)
-    except (OSError, ValueError) as error:
-        logger.error("Failed to load extensions", extra={"extra": {"error": str(error)}})
-        raise
-
-    code_binary = Path(args.code_binary).expanduser() if args.code_binary else None
-    command_base: List[str]
-    if code_binary:
-        command_base = [str(code_binary)]
-    else:
-        command_base = ["code"]
-
-    for extension in extensions:
-        command = command_base + ["--install-extension", extension]
-        try:
-            subprocess.run(
-                command,
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                timeout=DEFAULT_TIMEOUT_SECONDS,
-            )
-            logger.info(
-                "Extension installed", extra={"extra": {"extension": extension}}
-            )
-        except subprocess.CalledProcessError as error:
-            logger.error(
-                "Failed to install extension",
-                extra={
-                    "extra": {
-                        "extension": extension,
-                        "returncode": error.returncode,
-                        "stderr": error.stderr.decode("utf-8", errors="ignore"),
-                    }
-                },
-            )
-            if not args.keep_going:
-                raise
-        except subprocess.TimeoutExpired:
-            logger.error(
-                "Timed out installing extension",
-                extra={"extra": {"extension": extension}},
-            )
-            if not args.keep_going:
-                raise
-
-
-def buildParser() -> argparse.ArgumentParser:
-    """Construct the argument parser for the CLI."""
-
+def create_parser() -> argparse.ArgumentParser:
+    """Create the command-line argument parser."""
     parser = argparse.ArgumentParser(
-        prog="vscode-productivity-toolkit",
-        description="Automation utilities for managing VS Code productivity workflows.",
+        prog="vscode-toolkit",
+        description="VS Code Productivity Toolkit - Enterprise automation for developers",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Auto-detect project and install recommended tasks
+  vscode-toolkit install --auto-detect
+  
+  # Install specific task categories
+  vscode-toolkit install --categories python-general,docker,git
+  
+  # Detect project type without installing
+  vscode-toolkit detect --workspace .
+  
+  # Export current configuration
+  vscode-toolkit export --output my-config.json
+  
+  # Import team configuration
+  vscode-toolkit import --config team-config.json
+  
+  # Validate custom tasks
+  vscode-toolkit validate --path ./custom-tasks/
+        """,
     )
+
     parser.add_argument(
-        "--log-level",
-        default="INFO",
-        help="Logging verbosity (DEBUG, INFO, WARNING, ERROR).",
+        "--version",
+        action="version",
+        version="vscode-toolkit 1.0.0",
     )
+
     parser.add_argument(
-        "--plain-logs",
+        "--verbose", "-v",
+        action="count",
+        default=0,
+        help="Increase verbosity (use -v, -vv, or -vvv)",
+    )
+
+    parser.add_argument(
+        "--workspace", "-w",
+        type=Path,
+        default=Path.cwd(),
+        help="Path to workspace directory (default: current directory)",
+    )
+
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+
+    # Install command
+    install_parser = subparsers.add_parser(
+        "install",
+        help="Install productivity tasks",
+    )
+    install_group = install_parser.add_mutually_exclusive_group(required=True)
+    install_group.add_argument(
+        "--auto-detect",
         action="store_true",
-        help="Use plain text logs instead of JSON output.",
+        help="Auto-detect project type and install recommended tasks",
     )
-
-    subparsers = parser.add_subparsers(dest="command", required=True)
-
-    audit_parser = subparsers.add_parser("audit", help="Audit a VS Code workspace.")
-    audit_parser.add_argument("--workspace", required=True, help="Path to the workspace.")
-    audit_parser.add_argument(
-        "--extensions",
-        default=str(Path(__file__).resolve().parents[1] / "settings" / "extensions.json"),
-        help="Path to the recommended extensions file.",
+    install_group.add_argument(
+        "--categories",
+        type=str,
+        help="Comma-separated list of task categories to install",
     )
-    audit_parser.add_argument(
-        "--output",
-        help="Optional path to save the audit report as JSON.",
-    )
-    audit_parser.set_defaults(func=auditWorkspace)
-
-    configure_parser = subparsers.add_parser(
-        "configure", help="Export curated configuration files."
-    )
-    configure_parser.add_argument(
-        "--output", required=True, help="Destination directory for configuration files."
-    )
-    configure_parser.add_argument(
+    install_parser.add_argument(
         "--force",
         action="store_true",
-        help="Overwrite existing configuration files.",
+        help="Force installation even if tasks.json exists",
     )
-    configure_parser.set_defaults(func=configureWorkspace)
-
-    extensions_parser = subparsers.add_parser(
-        "extensions", help="Install recommended extensions via the VS Code CLI."
-    )
-    extensions_parser.add_argument(
-        "--extensions",
-        default=str(Path(__file__).resolve().parents[1] / "settings" / "extensions.json"),
-        help="Path to the recommended extensions file.",
-    )
-    extensions_parser.add_argument(
-        "--code-binary",
-        help="Path to the VS Code executable when it is not available on PATH.",
-    )
-    extensions_parser.add_argument(
-        "--keep-going",
+    install_parser.add_argument(
+        "--backup",
         action="store_true",
-        help="Continue installing extensions even if one fails.",
+        default=True,
+        help="Create backup before installation (default: True)",
     )
-    extensions_parser.set_defaults(func=manageExtensions)
+
+    # Detect command
+    detect_parser = subparsers.add_parser(
+        "detect",
+        help="Detect project type and suggest tasks",
+    )
+    detect_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output results in JSON format",
+    )
+
+    # Export command
+    export_parser = subparsers.add_parser(
+        "export",
+        help="Export current task configuration",
+    )
+    export_parser.add_argument(
+        "--output", "-o",
+        type=Path,
+        required=True,
+        help="Output file path for exported configuration",
+    )
+    export_parser.add_argument(
+        "--include-settings",
+        action="store_true",
+        help="Include VS Code settings in export",
+    )
+
+    # Import command
+    import_parser = subparsers.add_parser(
+        "import",
+        help="Import task configuration",
+    )
+    import_parser.add_argument(
+        "--config", "-c",
+        type=Path,
+        required=True,
+        help="Configuration file to import",
+    )
+    import_parser.add_argument(
+        "--merge",
+        action="store_true",
+        help="Merge with existing configuration",
+    )
+
+    # Validate command
+    validate_parser = subparsers.add_parser(
+        "validate",
+        help="Validate task definitions",
+    )
+    validate_parser.add_argument(
+        "--path", "-p",
+        type=Path,
+        help="Path to task definitions (default: current workspace)",
+    )
+
+    # List command
+    list_parser = subparsers.add_parser(
+        "list",
+        help="List available task categories",
+    )
+    list_parser.add_argument(
+        "--installed",
+        action="store_true",
+        help="Show only installed tasks",
+    )
+
+    # Clean command
+    clean_parser = subparsers.add_parser(
+        "clean",
+        help="Clean up task configurations",
+    )
+    clean_parser.add_argument(
+        "--backup-days",
+        type=int,
+        default=30,
+        help="Remove backups older than N days (default: 30)",
+    )
 
     return parser
 
 
-def main(argv: Iterable[str] | None = None) -> None:
-    """Entry point for the CLI."""
+def cmd_install(args: argparse.Namespace) -> int:
+    """Handle the install command."""
+    try:
+        workspace = validate_workspace(args.workspace)
+        installer = TaskInstaller(workspace)
 
-    parser = buildParser()
-    args = parser.parse_args(list(argv) if argv is not None else None)
-    configure_logging(level=args.log_level, use_json=not args.plain_logs)
-    args.func(args)
+        if args.auto_detect:
+            logger.info("Auto-detecting project type...")
+            detector = ProjectDetector()
+            detection_result = detector.detect_project_type(workspace)
+            
+            if not detection_result.detected_types:
+                logger.warning("No specific project type detected. Use --categories to install manually.")
+                return 1
+
+            categories = detector.suggest_task_categories(detection_result)
+            logger.info(f"Detected project types: {', '.join(detection_result.detected_types)}")
+            logger.info(f"Recommended categories: {', '.join(categories)}")
+
+        else:
+            categories = [cat.strip() for cat in args.categories.split(",")]
+            logger.info(f"Installing categories: {', '.join(categories)}")
+
+        # Validate categories
+        for category in categories:
+            if not TaskCategory.is_valid(category):
+                logger.error(f"Invalid task category: {category}")
+                return 1
+
+        # Install tasks
+        installer.install_task_categories(
+            categories,
+            force=args.force,
+            create_backup=args.backup
+        )
+
+        logger.info("✅ Task installation completed successfully!")
+        return 0
+
+    except Exception as e:
+        logger.error(f"Installation failed: {e}")
+        return 1
+
+
+def cmd_detect(args: argparse.Namespace) -> int:
+    """Handle the detect command."""
+    try:
+        workspace = validate_workspace(args.workspace)
+        detector = ProjectDetector()
+        
+        result = detector.detect_project_type(workspace)
+        suggestions = detector.suggest_task_categories(result)
+
+        if args.json:
+            output = {
+                "workspace": str(workspace),
+                "detected_types": result.detected_types,
+                "confidence": result.confidence,
+                "evidence": result.evidence,
+                "suggested_categories": suggestions,
+            }
+            print(json.dumps(output, indent=2))
+        else:
+            print(f"Workspace: {workspace}")
+            print(f"Detected project types: {', '.join(result.detected_types) or 'None'}")
+            
+            if result.detected_types:
+                print("\nConfidence scores:")
+                for proj_type, confidence in result.confidence.items():
+                    print(f"  {proj_type}: {confidence:.1%}")
+                
+                print(f"\nSuggested task categories: {', '.join(suggestions)}")
+
+        return 0
+
+    except Exception as e:
+        logger.error(f"Detection failed: {e}")
+        return 1
+
+
+def main(argv: Optional[List[str]] = None) -> int:
+    """Main entry point for the CLI."""
+    parser = create_parser()
+    args = parser.parse_args(argv)
+
+    # Set up logging
+    log_level = max(1, 3 - args.verbose) * 10  # 30=WARNING, 20=INFO, 10=DEBUG
+    setup_logging(level=log_level)
+
+    if not args.command:
+        parser.print_help()
+        return 1
+
+    # Route to command handlers
+    command_handlers = {
+        "install": cmd_install,
+        "detect": cmd_detect,
+    }
+
+    handler = command_handlers.get(args.command)
+    if not handler:
+        logger.error(f"Unknown command: {args.command}")
+        return 1
+
+    try:
+        return handler(args)
+    except KeyboardInterrupt:
+        logger.info("Operation cancelled by user")
+        return 130
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        if args.verbose >= 2:
+            import traceback
+            traceback.print_exc()
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

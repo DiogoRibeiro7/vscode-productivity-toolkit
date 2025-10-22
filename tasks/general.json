@@ -1,0 +1,298 @@
+{
+  "_fileLocation": "/tasks/python/",
+  "_metadata": {
+    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
+    "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
+    "description": "VS Code tasks for Python development: linting, testing, packaging, and quality assurance workflows.",
+    "version": "1.0.0"
+  },
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "pythonInterpreter",
+      "type": "promptString",
+      "description": "Python interpreter path",
+      "default": "python"
+    },
+    {
+      "id": "testDirectory",
+      "type": "promptString", 
+      "description": "Test directory path",
+      "default": "tests"
+    },
+    {
+      "id": "packageName",
+      "type": "promptString",
+      "description": "Package name for distribution",
+      "default": "${workspaceFolderBasename}"
+    },
+    {
+      "id": "coverageThreshold",
+      "type": "promptString",
+      "description": "Minimum coverage percentage",
+      "default": "80"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "python:lint-black",
+      "detail": "Format Python code with Black",
+      "type": "shell",
+      "command": "${input:pythonInterpreter}",
+      "args": ["-m", "black", "."],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "python:lint-black-check",
+      "detail": "Check Python code formatting with Black",
+      "type": "shell",
+      "command": "${input:pythonInterpreter}",
+      "args": ["-m", "black", "--check", "--diff", "."],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": [
+        "$black"
+      ]
+    },
+    {
+      "label": "python:lint-isort",
+      "detail": "Sort Python imports with isort",
+      "type": "shell",
+      "command": "${input:pythonInterpreter}",
+      "args": ["-m", "isort", "."],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "python:lint-flake8",
+      "detail": "Lint Python code with flake8",
+      "type": "shell",
+      "command": "${input:pythonInterpreter}",
+      "args": ["-m", "flake8", "."],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": [
+        "$flake8"
+      ]
+    },
+    {
+      "label": "python:type-check-mypy",
+      "detail": "Type check Python code with mypy",
+      "type": "shell",
+      "command": "${input:pythonInterpreter}",
+      "args": ["-m", "mypy", "."],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": [
+        "$mypy"
+      ]
+    },
+    {
+      "label": "python:test-pytest",
+      "detail": "Run tests with pytest",
+      "type": "shell",
+      "command": "${input:pythonInterpreter}",
+      "args": ["-m", "pytest", "${input:testDirectory}", "-v"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": [
+        "$pytest"
+      ]
+    },
+    {
+      "label": "python:test-coverage",
+      "detail": "Run tests with coverage reporting",
+      "type": "shell",
+      "command": "${input:pythonInterpreter}",
+      "args": [
+        "-m", "pytest", 
+        "--cov=${input:packageName}",
+        "--cov-report=term-missing",
+        "--cov-report=html",
+        "--cov-fail-under=${input:coverageThreshold}",
+        "${input:testDirectory}"
+      ],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": [
+        "$pytest"
+      ]
+    },
+    {
+      "label": "python:security-bandit",
+      "detail": "Security analysis with bandit",
+      "type": "shell",
+      "command": "${input:pythonInterpreter}",
+      "args": ["-m", "bandit", "-r", ".", "-ll"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": [
+        "$bandit"
+      ]
+    },
+    {
+      "label": "python:dependencies-check",
+      "detail": "Check dependencies for security vulnerabilities",
+      "type": "shell",
+      "command": "${input:pythonInterpreter}",
+      "args": ["-m", "safety", "check"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "python:build-package",
+      "detail": "Build Python package distribution",
+      "type": "shell",
+      "command": "${input:pythonInterpreter}",
+      "args": ["-m", "build"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "python:install-dev",
+      "detail": "Install package in development mode",
+      "type": "shell",
+      "command": "${input:pythonInterpreter}",
+      "args": ["-m", "pip", "install", "-e", ".[dev]"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "python:quality-all",
+      "detail": "Run all quality checks (format, lint, type-check, test)",
+      "dependsOn": [
+        "python:lint-black",
+        "python:lint-isort", 
+        "python:lint-flake8",
+        "python:type-check-mypy",
+        "python:test-coverage",
+        "python:security-bandit"
+      ],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      }
+    }
+  ],
+  "problemMatchers": [
+    {
+      "name": "$black",
+      "owner": "black",
+      "fileLocation": "absolute",
+      "pattern": {
+        "regexp": "^would reformat (.*)$",
+        "file": 1,
+        "message": "Would reformat with Black"
+      }
+    },
+    {
+      "name": "$flake8",
+      "owner": "flake8",
+      "fileLocation": "absolute",
+      "pattern": {
+        "regexp": "^(.*):(\\d+):(\\d+):\\s+(\\w\\d+)\\s+(.*)$",
+        "file": 1,
+        "line": 2,
+        "column": 3,
+        "code": 4,
+        "message": 5
+      }
+    },
+    {
+      "name": "$mypy",
+      "owner": "mypy",
+      "fileLocation": "absolute",
+      "pattern": {
+        "regexp": "^(.*):(\\d+):(\\d+):\\s+(error|warning|note):\\s+(.*)$",
+        "file": 1,
+        "line": 2,
+        "column": 3,
+        "severity": 4,
+        "message": 5
+      }
+    },
+    {
+      "name": "$pytest",
+      "owner": "pytest",
+      "fileLocation": "absolute",
+      "pattern": [
+        {
+          "regexp": "^(.*):(\\d+):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "message": 3
+        }
+      ]
+    },
+    {
+      "name": "$bandit",
+      "owner": "bandit",
+      "fileLocation": "absolute", 
+      "pattern": {
+        "regexp": "^(.*):(\\d+):\\s+\\[(.*)\\]\\s+(.*)$",
+        "file": 1,
+        "line": 2,
+        "code": 3,
+        "message": 4
+      }
+    }
+  ]
+}

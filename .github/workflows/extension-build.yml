@@ -1,0 +1,280 @@
+# MIT License
+# Copyright (c) 2025 Diogo Ribeiro
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+name: extension-build
+
+on:
+  push:
+    branches: ["main", "feature/**", "hotfix/**"]
+    paths: 
+      - "extensions/smart-task-detector/**"
+      - ".github/workflows/extension-build.yml"
+  pull_request:
+    branches: ["main"]
+    paths: 
+      - "extensions/smart-task-detector/**"
+      - ".github/workflows/extension-build.yml"
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
+jobs:
+  extension-test:
+    name: Extension Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [18.x, 20.x]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: extensions/smart-task-detector/package-lock.json
+
+      - name: Install extension dependencies
+        run: npm ci
+        working-directory: extensions/smart-task-detector
+
+      - name: Run TypeScript compilation
+        run: npm run compile
+        working-directory: extensions/smart-task-detector
+
+      - name: Run linting
+        run: npm run lint
+        working-directory: extensions/smart-task-detector
+
+      - name: Run unit tests
+        run: npm test
+        working-directory: extensions/smart-task-detector
+
+  extension-build:
+    name: Extension Build & Package
+    runs-on: ubuntu-latest
+    needs: extension-test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: extensions/smart-task-detector/package-lock.json
+
+      - name: Install extension dependencies
+        run: npm ci
+        working-directory: extensions/smart-task-detector
+
+      - name: Build extension
+        run: npm run package
+        working-directory: extensions/smart-task-detector
+
+      - name: Package extension
+        run: npx vsce package --no-dependencies
+        working-directory: extensions/smart-task-detector
+
+      - name: Upload extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vscode-extension-${{ github.sha }}
+          path: extensions/smart-task-detector/*.vsix
+          retention-days: 30
+
+  extension-integration:
+    name: Extension Integration Tests
+    runs-on: ubuntu-latest
+    needs: extension-build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: extensions/smart-task-detector/package-lock.json
+
+      - name: Install extension dependencies
+        run: npm ci
+        working-directory: extensions/smart-task-detector
+
+      - name: Install VS Code
+        run: |
+          wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+          sudo install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
+          sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
+          sudo apt update
+          sudo apt install code
+
+      - name: Run VS Code extension tests
+        run: xvfb-run -a npm run test
+        working-directory: extensions/smart-task-detector
+        env:
+          DISPLAY: ':99.0'
+
+  security-scan:
+    name: Extension Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: extensions/smart-task-detector/package-lock.json
+
+      - name: Install extension dependencies
+        run: npm ci
+        working-directory: extensions/smart-task-detector
+
+      - name: Run npm audit
+        run: npm audit --production --audit-level moderate
+        working-directory: extensions/smart-task-detector
+
+      - name: Check for outdated dependencies
+        run: npm outdated || true
+        working-directory: extensions/smart-task-detector
+
+  marketplace-validation:
+    name: Marketplace Validation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    needs: [extension-test, extension-build]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: extensions/smart-task-detector/package-lock.json
+
+      - name: Install extension dependencies
+        run: npm ci
+        working-directory: extensions/smart-task-detector
+
+      - name: Validate package.json
+        run: |
+          node -e "
+          const pkg = require('./package.json');
+          if (!pkg.publisher) throw new Error('Missing publisher');
+          if (!pkg.displayName) throw new Error('Missing displayName');
+          if (!pkg.description) throw new Error('Missing description');
+          if (!pkg.repository) throw new Error('Missing repository');
+          if (!pkg.engines || !pkg.engines.vscode) throw new Error('Missing vscode engine');
+          console.log('Package validation passed');
+          "
+        working-directory: extensions/smart-task-detector
+
+      - name: Check for required files
+        run: |
+          required_files=("README.md" "package.json" "src/extension.ts")
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "Missing required file: $file"
+              exit 1
+            fi
+          done
+          echo "All required files present"
+        working-directory: extensions/smart-task-detector
+
+      - name: Validate extension manifest
+        run: npx vsce ls
+        working-directory: extensions/smart-task-detector
+
+  publish-ready:
+    name: Publish Readiness Check
+    needs: [extension-test, extension-build, security-scan, marketplace-validation]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Download extension artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vscode-extension-${{ github.sha }}
+          path: ./artifacts
+
+      - name: List artifacts
+        run: ls -la ./artifacts
+
+      - name: Mark as publish ready
+        run: echo "Extension is ready for marketplace publication"
+
+  auto-publish:
+    name: Auto Publish to Marketplace
+    needs: publish-ready
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish]')
+    environment: marketplace
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: extensions/smart-task-detector/package-lock.json
+
+      - name: Install extension dependencies
+        run: npm ci
+        working-directory: extensions/smart-task-detector
+
+      - name: Publish to VS Code Marketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
+        run: npx vsce publish --no-dependencies
+        working-directory: extensions/smart-task-detector
+
+      - name: Create GitHub Release
+        if: success()
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: extension-v${{ github.run_number }}
+          release_name: VS Code Extension v${{ github.run_number }}
+          body: |
+            Automated release of VS Code Productivity Toolkit Smart Detector extension.
+            
+            This release includes:
+            - Smart project type detection
+            - Automated task installation
+            - Task management interface
+            - Backup and restore functionality
+          draft: false
+          prerelease: false

@@ -53,7 +53,7 @@ updates:
     directory: "/extensions/smart-task-detector"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 3
+    open-pull-requests-limit: 10
     reviewers:
       - "DiogoRibeiro7"
     assignees:
@@ -81,7 +81,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 3
+    open-pull-requests-limit: 10
     reviewers:
       - "DiogoRibeiro7"
     assignees:
@@ -101,7 +101,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 2
+    open-pull-requests-limit: 10
     reviewers:
       - "DiogoRibeiro7"
     assignees:
@@ -118,7 +118,7 @@ updates:
     directory: "/examples/sample-projects/react-dashboard"
     schedule:
       interval: "monthly"
-    open-pull-requests-limit: 2
+    open-pull-requests-limit: 10
     reviewers:
       - "DiogoRibeiro7"
     commit-message:
@@ -134,7 +134,7 @@ updates:
     directory: "/examples/sample-projects/python-data-science"
     schedule:
       interval: "monthly"
-    open-pull-requests-limit: 2
+    open-pull-requests-limit: 10
     reviewers:
       - "DiogoRibeiro7"
     commit-message:

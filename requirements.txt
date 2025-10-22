@@ -23,7 +23,7 @@ bandit>=1.7.0,<2.0.0         # Security analysis
 # Documentation and quality assurance
 mkdocs>=1.4.0,<2.0.0         # Documentation generator
 mkdocs-material>=9.0.0,<10.0.0  # Material design theme
-pre-commit>=3.0.0,<4.0.0     # Pre-commit hooks
+pre-commit>=3.0.0,<5.0.0     # Pre-commit hooks
 tox>=4.0.0,<5.0.0            # Testing across environments
 
 # Optional dependencies for enhanced functionality

@@ -1,0 +1,379 @@
+{
+  "_fileLocation": "/tasks/git/",
+  "_metadata": {
+    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
+    "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
+    "description": "VS Code tasks for Git hooks management: pre-commit validation, automated quality checks, and workflow enforcement.",
+    "version": "1.0.0"
+  },
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "hookType",
+      "type": "pickString",
+      "description": "Git hook type",
+      "options": ["pre-commit", "pre-push", "commit-msg", "post-commit", "pre-rebase"],
+      "default": "pre-commit"
+    },
+    {
+      "id": "packageManager",
+      "type": "pickString",
+      "description": "Package manager for Node.js projects",
+      "options": ["npm", "yarn", "pnpm"],
+      "default": "npm"
+    },
+    {
+      "id": "pythonExecutable",
+      "type": "promptString",
+      "description": "Python executable path",
+      "default": "python"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "git-hooks:install-pre-commit",
+      "detail": "Install pre-commit framework",
+      "type": "shell",
+      "command": "${input:pythonExecutable}",
+      "args": ["-m", "pip", "install", "pre-commit"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "git-hooks:setup-pre-commit",
+      "detail": "Setup pre-commit hooks",
+      "type": "shell",
+      "command": "pre-commit",
+      "args": ["install"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "git-hooks:run-pre-commit",
+      "detail": "Run pre-commit hooks on all files",
+      "type": "shell",
+      "command": "pre-commit",
+      "args": ["run", "--all-files"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": [
+        "$pre-commit"
+      ]
+    },
+    {
+      "label": "git-hooks:run-pre-commit-staged",
+      "detail": "Run pre-commit hooks on staged files",
+      "type": "shell",
+      "command": "pre-commit",
+      "args": ["run"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": [
+        "$pre-commit"
+      ]
+    },
+    {
+      "label": "git-hooks:update-pre-commit",
+      "detail": "Update pre-commit hooks",
+      "type": "shell",
+      "command": "pre-commit",
+      "args": ["autoupdate"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "git-hooks:install-husky",
+      "detail": "Install Husky for Node.js projects",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["install", "--save-dev", "husky"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "git-hooks:setup-husky",
+      "detail": "Setup Husky hooks",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["exec", "husky", "install"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "git-hooks:add-husky-pre-commit",
+      "detail": "Add Husky pre-commit hook",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["exec", "husky", "add", ".husky/pre-commit", "npm run lint && npm test"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "git-hooks:add-husky-commit-msg",
+      "detail": "Add Husky commit message validation",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["exec", "husky", "add", ".husky/commit-msg", "npx commitlint --edit $1"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "git-hooks:install-commitlint",
+      "detail": "Install commitlint for conventional commits",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["install", "--save-dev", "@commitlint/cli", "@commitlint/config-conventional"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "git-hooks:validate-commit-msg",
+      "detail": "Validate commit message format",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "echo '${input:commitMessage}' | npx commitlint"
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-Command",
+          "echo '${input:commitMessage}' | npx commitlint"
+        ]
+      },
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "git-hooks:create-pre-commit-config",
+      "detail": "Create .pre-commit-config.yaml",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "cat > .pre-commit-config.yaml << 'EOF'\nrepos:\n  - repo: https://github.com/pre-commit/pre-commit-hooks\n    rev: v4.4.0\n    hooks:\n      - id: trailing-whitespace\n      - id: end-of-file-fixer\n      - id: check-yaml\n      - id: check-added-large-files\n      - id: check-merge-conflict\n  - repo: https://github.com/psf/black\n    rev: 23.1.0\n    hooks:\n      - id: black\n        language_version: python3\n  - repo: https://github.com/pycqa/isort\n    rev: 5.12.0\n    hooks:\n      - id: isort\n        args: [\"--profile\", \"black\"]\n  - repo: https://github.com/pycqa/flake8\n    rev: 6.0.0\n    hooks:\n      - id: flake8\nEOF\necho 'Created .pre-commit-config.yaml'"
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-Command",
+          "@'\nrepos:\n  - repo: https://github.com/pre-commit/pre-commit-hooks\n    rev: v4.4.0\n    hooks:\n      - id: trailing-whitespace\n      - id: end-of-file-fixer\n      - id: check-yaml\n      - id: check-added-large-files\n      - id: check-merge-conflict\n  - repo: https://github.com/psf/black\n    rev: 23.1.0\n    hooks:\n      - id: black\n        language_version: python3\n  - repo: https://github.com/pycqa/isort\n    rev: 5.12.0\n    hooks:\n      - id: isort\n        args: [\"--profile\", \"black\"]\n  - repo: https://github.com/pycqa/flake8\n    rev: 6.0.0\n    hooks:\n      - id: flake8\n'@ | Out-File -FilePath '.pre-commit-config.yaml' -Encoding utf8; Write-Host 'Created .pre-commit-config.yaml'"
+        ]
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "git-hooks:create-commitlint-config",
+      "detail": "Create commitlint.config.js",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "cat > commitlint.config.js << 'EOF'\nmodule.exports = {\n  extends: ['@commitlint/config-conventional'],\n  rules: {\n    'type-enum': [\n      2,\n      'always',\n      ['feat', 'fix', 'docs', 'style', 'refactor', 'test', 'chore', 'revert']\n    ],\n    'subject-case': [2, 'always', 'lower-case'],\n    'subject-empty': [2, 'never'],\n    'subject-max-length': [2, 'always', 50],\n    'body-max-line-length': [2, 'always', 72]\n  }\n};\nEOF\necho 'Created commitlint.config.js'"
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-Command",
+          "@'\nmodule.exports = {\n  extends: ['@commitlint/config-conventional'],\n  rules: {\n    'type-enum': [\n      2,\n      'always',\n      ['feat', 'fix', 'docs', 'style', 'refactor', 'test', 'chore', 'revert']\n    ],\n    'subject-case': [2, 'always', 'lower-case'],\n    'subject-empty': [2, 'never'],\n    'subject-max-length': [2, 'always', 50],\n    'body-max-line-length': [2, 'always', 72]\n  }\n};\n'@ | Out-File -FilePath 'commitlint.config.js' -Encoding utf8; Write-Host 'Created commitlint.config.js'"
+        ]
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "git-hooks:list-hooks",
+      "detail": "List installed Git hooks",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "ls -la .git/hooks/ | grep -v sample || echo 'No custom hooks found'"
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-Command",
+          "Get-ChildItem -Path '.git/hooks/' -File | Where-Object { $_.Name -notlike '*sample*' } | Format-Table Name, Length, LastWriteTime"
+        ]
+      },
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "git-hooks:test-hooks",
+      "detail": "Test all Git hooks",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "echo 'Testing pre-commit hooks...' && pre-commit run --all-files && echo 'Testing commit message validation...' && echo 'feat: test commit message' | npx commitlint"
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-Command",
+          "Write-Host 'Testing pre-commit hooks...'; pre-commit run --all-files; Write-Host 'Testing commit message validation...'; 'feat: test commit message' | npx commitlint"
+        ]
+      },
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": [
+        "$pre-commit"
+      ]
+    },
+    {
+      "label": "git-hooks:uninstall-hooks",
+      "detail": "Uninstall all Git hooks",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "pre-commit uninstall && rm -rf .husky && echo 'Git hooks uninstalled'"
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-Command",
+          "pre-commit uninstall; Remove-Item -Recurse -Force .husky -ErrorAction SilentlyContinue; Write-Host 'Git hooks uninstalled'"
+        ]
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "git-hooks:setup-python-project",
+      "detail": "Setup complete Git hooks for Python project",
+      "dependsOn": [
+        "git-hooks:install-pre-commit",
+        "git-hooks:create-pre-commit-config",
+        "git-hooks:setup-pre-commit"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      }
+    },
+    {
+      "label": "git-hooks:setup-node-project",
+      "detail": "Setup complete Git hooks for Node.js project",
+      "dependsOn": [
+        "git-hooks:install-husky",
+        "git-hooks:setup-husky",
+        "git-hooks:install-commitlint",
+        "git-hooks:create-commitlint-config",
+        "git-hooks:add-husky-pre-commit",
+        "git-hooks:add-husky-commit-msg"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      }
+    }
+  ],
+  "problemMatchers": [
+    {
+      "name": "$pre-commit",
+      "owner": "pre-commit",
+      "fileLocation": "relative",
+      "pattern": [
+        {
+          "regexp": "^(.*)\\.\\.\\.(Passed|Failed|Skipped)$",
+          "message": 1,
+          "severity": 2
+        },
+        {
+          "regexp": "^- hook id: (.*)$",
+          "message": 1
+        },
+        {
+          "regexp": "^- exit code: (\\d+)$",
+          "code": 1
+        }
+      ]
+    }
+  ]
+}

@@ -1,295 +1,311 @@
 {
+  "_fileLocation": "/tasks/javascript/",
   "_metadata": {
     "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
     "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
-    "description": "VS Code tasks for JavaScript and TypeScript quality automation, package management, and documentation workflows.",
+    "description": "VS Code tasks for JavaScript/TypeScript development: linting, formatting, testing, and dependency management.",
     "version": "1.0.0"
   },
   "version": "2.0.0",
   "inputs": [
     {
-      "id": "coverageThreshold",
+      "id": "packageManager",
+      "type": "pickString",
+      "description": "Package manager to use",
+      "options": ["npm", "yarn", "pnpm"],
+      "default": "npm"
+    },
+    {
+      "id": "testDirectory",
       "type": "promptString",
-      "description": "Minimum acceptable coverage percentage",
-      "default": "85"
+      "description": "Test directory or pattern",
+      "default": "test"
+    },
+    {
+      "id": "srcDirectory",
+      "type": "promptString",
+      "description": "Source directory",
+      "default": "src"
+    },
+    {
+      "id": "buildDirectory",
+      "type": "promptString",
+      "description": "Build output directory",
+      "default": "dist"
     }
   ],
   "tasks": [
     {
-      "label": "javascript:lint",
-      "detail": "Run ESLint across the workspace",
+      "label": "javascript:install",
+      "detail": "Install dependencies",
       "type": "shell",
-      "command": "npx",
-      "windows": {
-        "command": "npx.cmd"
-      },
-      "args": [
-        "eslint",
-        ".",
-        "--max-warnings",
-        "0"
-      ],
-      "problemMatcher": [
-        "$eslint-stylish"
-      ],
+      "command": "${input:packageManager}",
+      "args": ["install"],
+      "group": "build",
       "presentation": {
         "reveal": "always",
         "panel": "shared",
         "clear": true
-      }
-    },
-    {
-      "label": "javascript:format",
-      "detail": "Format files using Prettier",
-      "type": "shell",
-      "command": "npx",
-      "windows": {
-        "command": "npx.cmd"
       },
-      "args": [
-        "prettier",
-        "--write",
-        "."
-      ],
-      "problemMatcher": [],
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      }
-    },
-    {
-      "label": "javascript:install-npm",
-      "detail": "Install dependencies using npm",
-      "type": "shell",
-      "command": "npm",
-      "windows": {
-        "command": "npm.cmd"
-      },
-      "args": [
-        "install"
-      ],
       "problemMatcher": [
         "$npm-install"
-      ],
+      ]
+    },
+    {
+      "label": "javascript:lint-eslint",
+      "detail": "Lint JavaScript/TypeScript with ESLint",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["run", "lint"],
+      "group": "test",
       "presentation": {
         "reveal": "always",
         "panel": "shared",
         "clear": true
-      }
+      },
+      "problemMatcher": [
+        "$eslint-stylish"
+      ]
     },
     {
-      "label": "javascript:install-yarn",
-      "detail": "Install dependencies using Yarn",
-      "type": "shell",
-      "command": "yarn",
-      "windows": {
-        "command": "yarn.cmd"
-      },
-      "args": [
-        "install"
-      ],
-      "problemMatcher": [
-        "$yarn-install"
-      ],
+      "label": "javascript:lint-fix",
+      "detail": "Auto-fix ESLint issues",
+      "type": "shell", 
+      "command": "${input:packageManager}",
+      "args": ["run", "lint", "--", "--fix"],
+      "group": "build",
       "presentation": {
         "reveal": "always",
         "panel": "shared",
         "clear": true
-      }
+      },
+      "problemMatcher": [
+        "$eslint-stylish"
+      ]
     },
     {
-      "label": "javascript:install-pnpm",
-      "detail": "Install dependencies using pnpm",
+      "label": "javascript:format-prettier",
+      "detail": "Format code with Prettier",
       "type": "shell",
-      "command": "pnpm",
-      "windows": {
-        "command": "pnpm.cmd"
-      },
-      "args": [
-        "install"
-      ],
-      "problemMatcher": [
-        "$pnpm-install"
-      ],
+      "command": "${input:packageManager}",
+      "args": ["run", "format"],
+      "group": "build",
       "presentation": {
         "reveal": "always",
         "panel": "shared",
         "clear": true
-      }
+      },
+      "problemMatcher": []
     },
     {
-      "label": "javascript:typecheck",
-      "detail": "Compile TypeScript without emitting output",
+      "label": "javascript:format-check",
+      "detail": "Check code formatting with Prettier",
       "type": "shell",
-      "command": "npx",
-      "windows": {
-        "command": "npx.cmd"
-      },
-      "args": [
-        "tsc",
-        "--noEmit"
-      ],
-      "problemMatcher": [
-        "$tsc"
-      ],
+      "command": "${input:packageManager}",
+      "args": ["run", "format:check"],
+      "group": "test",
       "presentation": {
-        "reveal": "silent",
+        "reveal": "always",
         "panel": "shared",
         "clear": true
-      }
+      },
+      "problemMatcher": []
     },
     {
-      "label": "javascript:test-unit",
-      "detail": "Run unit tests using the configured test runner",
+      "label": "javascript:test",
+      "detail": "Run tests",
       "type": "shell",
-      "command": "npm",
-      "windows": {
-        "command": "npm.cmd"
+      "command": "${input:packageManager}",
+      "args": ["test"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
       },
-      "args": [
-        "run",
-        "test",
-        "--",
-        "--runInBand",
-        "--watchAll=false"
-      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
       "problemMatcher": [
         "$jest-watch"
-      ],
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      }
+      ]
     },
     {
-      "label": "javascript:test-integration",
-      "detail": "Execute integration tests using npm scripts",
+      "label": "javascript:test-coverage",
+      "detail": "Run tests with coverage",
       "type": "shell",
-      "command": "npm",
-      "windows": {
-        "command": "npm.cmd"
-      },
-      "args": [
-        "run",
-        "test:integration"
-      ],
-      "problemMatcher": [
-        "$mocha-summary"
-      ],
+      "command": "${input:packageManager}",
+      "args": ["run", "test:coverage"],
+      "group": "test",
       "presentation": {
         "reveal": "always",
-        "panel": "shared",
+        "panel": "dedicated",
         "clear": true
-      }
-    },
-    {
-      "label": "javascript:coverage",
-      "detail": "Generate coverage report and enforce minimum threshold",
-      "type": "shell",
-      "command": "npm",
-      "windows": {
-        "command": "npm.cmd"
       },
-      "args": [
-        "run",
-        "test:coverage",
-        "--",
-        "--coverageThreshold",
-        "global.total=${input:coverageThreshold}"
-      ],
       "problemMatcher": [
         "$jest-watch"
-      ],
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      }
+      ]
     },
     {
-      "label": "javascript:docs",
-      "detail": "Build project documentation using the configured generator",
+      "label": "javascript:test-watch",
+      "detail": "Run tests in watch mode",
       "type": "shell",
-      "command": "npm",
-      "windows": {
-        "command": "npm.cmd"
+      "command": "${input:packageManager}",
+      "args": ["run", "test:watch"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
       },
-      "args": [
-        "run",
-        "docs"
-      ],
       "problemMatcher": [
-        "$typedoc"
-      ],
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      }
+        "$jest-watch"
+      ]
     },
     {
-      "label": "javascript:dependency-update",
-      "detail": "Check and update outdated dependencies",
+      "label": "javascript:build",
+      "detail": "Build project",
       "type": "shell",
-      "command": "npx",
-      "windows": {
-        "command": "npx.cmd"
+      "command": "${input:packageManager}",
+      "args": ["run", "build"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
       },
-      "args": [
-        "npm-check-updates",
-        "--upgrade"
-      ],
-      "problemMatcher": [
-        "$ncu"
-      ],
       "presentation": {
         "reveal": "always",
         "panel": "shared",
         "clear": true
-      }
-    },
-    {
-      "label": "javascript:vulnerability-fix",
-      "detail": "Attempt automated remediation of vulnerabilities",
-      "type": "shell",
-      "command": "npm",
-      "windows": {
-        "command": "npm.cmd"
       },
-      "args": [
-        "audit",
-        "fix",
-        "--force"
-      ],
       "problemMatcher": [
-        "$npm-audit"
-      ],
+        "$typescript"
+      ]
+    },
+    {
+      "label": "javascript:build-watch",
+      "detail": "Build project in watch mode",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["run", "build:watch"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": [
+        "$typescript"
+      ]
+    },
+    {
+      "label": "javascript:dev",
+      "detail": "Start development server",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["run", "dev"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "javascript:type-check",
+      "detail": "TypeScript type checking",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["run", "type-check"],
+      "group": "test",
       "presentation": {
         "reveal": "always",
         "panel": "shared",
         "clear": true
-      }
+      },
+      "problemMatcher": [
+        "$typescript"
+      ]
     },
     {
-      "label": "javascript:verify",
-      "detail": "Run the full JavaScript quality gate",
+      "label": "javascript:audit",
+      "detail": "Audit dependencies for vulnerabilities",
       "type": "shell",
-      "command": "echo",
+      "command": "${input:packageManager}",
+      "args": ["audit"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "javascript:audit-fix",
+      "detail": "Auto-fix dependency vulnerabilities",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["audit", "fix"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "javascript:outdated",
+      "detail": "Check for outdated dependencies",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["outdated"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "javascript:clean",
+      "detail": "Clean build artifacts and dependencies",
+      "type": "shell",
+      "command": "bash",
       "args": [
-        "JavaScript verification complete"
+        "-c",
+        "rm -rf node_modules ${input:buildDirectory} && ${input:packageManager} install"
       ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-Command",
+          "Remove-Item -Recurse -Force node_modules, ${input:buildDirectory} -ErrorAction SilentlyContinue; ${input:packageManager} install"
+        ]
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "javascript:quality-all",
+      "detail": "Run all quality checks (lint, format-check, type-check, test)",
       "dependsOn": [
-        "javascript:lint",
-        "javascript:typecheck",
-        "javascript:test-unit",
-        "javascript:test-integration",
-        "javascript:coverage"
+        "javascript:lint-eslint",
+        "javascript:format-check",
+        "javascript:type-check",
+        "javascript:test-coverage",
+        "javascript:audit"
       ],
-      "problemMatcher": [],
+      "group": "test",
       "presentation": {
-        "reveal": "never",
+        "reveal": "always",
         "panel": "shared",
         "clear": false
       }
@@ -306,46 +322,24 @@
       }
     },
     {
-      "name": "$yarn-install",
-      "owner": "npm",
-      "fileLocation": "absolute",
-      "pattern": {
-        "regexp": "^error (.*)$",
-        "message": 1
-      }
-    },
-    {
-      "name": "$pnpm-install",
-      "owner": "npm",
-      "fileLocation": "absolute",
-      "pattern": {
-        "regexp": "^\u001b\\[[0-9;]*m?ERR_PNPM\u001b\\[[0-9;]*m?\\s*(.*)$",
-        "message": 1
-      }
-    },
-    {
-      "name": "$typedoc",
-      "owner": "typescript",
-      "fileLocation": [
-        "relative",
-        "${workspaceFolder}"
-      ],
-      "pattern": {
-        "regexp": "^Error: (.*) in (.*):(\\d+):(\\d+)$",
-        "message": 1,
-        "file": 2,
-        "line": 3,
-        "column": 4
-      }
-    },
-    {
-      "name": "$ncu",
-      "owner": "npm",
-      "fileLocation": "absolute",
-      "pattern": {
-        "regexp": "^\\s*\\*\\s*(.*)$",
-        "message": 1
-      }
+      "name": "$jest-watch",
+      "owner": "jest",
+      "fileLocation": "relative",
+      "pattern": [
+        {
+          "regexp": "^\\s+at\\s+(.*):(\\d+):(\\d+)$",
+          "file": 1,
+          "line": 2,
+          "column": 3
+        },
+        {
+          "regexp": "^\\s*(.*)\\s*\\((.*):(\\d+):(\\d+)\\)$",
+          "message": 1,
+          "file": 2,
+          "line": 3,
+          "column": 4
+        }
+      ]
     }
   ]
 }

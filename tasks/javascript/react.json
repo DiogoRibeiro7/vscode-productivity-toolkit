@@ -1,272 +1,368 @@
 {
+  "_fileLocation": "/tasks/javascript/",
   "_metadata": {
     "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
     "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
-    "description": "VS Code tasks for React and TypeScript workflows including scaffolding, testing, and performance auditing.",
+    "description": "VS Code tasks for React application development: component scaffolding, Storybook, PWA audits, and performance optimization.",
     "version": "1.0.0"
   },
   "version": "2.0.0",
   "inputs": [
     {
-      "id": "reactComponentName",
-      "type": "promptString",
-      "description": "Name of the React component to generate (PascalCase recommended)",
-      "default": "SampleComponent"
+      "id": "packageManager",
+      "type": "pickString",
+      "description": "Package manager to use",
+      "options": ["npm", "yarn", "pnpm"],
+      "default": "npm"
     },
     {
-      "id": "storybookPort",
+      "id": "componentName",
       "type": "promptString",
-      "description": "Port to expose Storybook UI",
-      "default": "6006"
+      "description": "Component name for scaffolding",
+      "default": "MyComponent"
     },
     {
-      "id": "bundleAnalyzerPort",
+      "id": "buildDirectory",
       "type": "promptString",
-      "description": "Port for bundle analyzer server",
-      "default": "8888"
+      "description": "Build output directory",
+      "default": "build"
     },
     {
-      "id": "pwaAuditUrl",
+      "id": "publicUrl",
       "type": "promptString",
-      "description": "URL to audit for PWA readiness",
-      "default": "http://localhost:3000"
+      "description": "Public URL for deployment",
+      "default": "/"
     }
   ],
   "tasks": [
     {
-      "label": "react:create-component",
-      "detail": "Scaffold a TypeScript React component using the local project generator",
+      "label": "react:start",
+      "detail": "Start React development server",
       "type": "shell",
-      "command": "npm",
-      "windows": {
-        "command": "npm.cmd"
+      "command": "${input:packageManager}",
+      "args": ["start"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
       },
-      "args": [
-        "run",
-        "generate:component",
-        "--",
-        "--name",
-        "${input:reactComponentName}",
-        "--language",
-        "ts"
-      ],
-      "problemMatcher": [],
-      "presentation": {
-        "reveal": "always",
-        "focus": true,
-        "panel": "shared"
-      }
-    },
-    {
-      "label": "react:dev-server",
-      "detail": "Launch the React development server with hot module replacement",
-      "type": "shell",
-      "command": "npm",
-      "windows": {
-        "command": "npm.cmd"
-      },
-      "args": [
-        "run",
-        "dev"
-      ],
-      "isBackground": true,
-      "problemMatcher": [
-        "$tsc-watch"
-      ],
       "presentation": {
         "reveal": "always",
         "panel": "dedicated",
-        "clear": false
-      }
-    },
-    {
-      "label": "react:lint",
-      "detail": "Run ESLint with TypeScript configuration",
-      "type": "shell",
-      "command": "npm",
-      "windows": {
-        "command": "npm.cmd"
-      },
-      "args": [
-        "run",
-        "lint"
-      ],
-      "problemMatcher": [
-        "$eslint-stylish"
-      ],
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
         "clear": true
-      }
-    },
-    {
-      "label": "react:type-check",
-      "detail": "Run TypeScript compiler in noEmit mode",
-      "type": "shell",
-      "command": "npx",
-      "windows": {
-        "command": "npx.cmd"
       },
-      "args": [
-        "tsc",
-        "--noEmit"
-      ],
       "problemMatcher": [
-        "$tsc"
-      ],
-      "presentation": {
-        "reveal": "silent",
-        "panel": "shared",
-        "clear": true
-      }
+        "$webpack-dev-server"
+      ]
     },
     {
       "label": "react:build",
-      "detail": "Create optimized production bundle",
+      "detail": "Build React app for production",
       "type": "shell",
-      "command": "npm",
-      "windows": {
-        "command": "npm.cmd"
+      "command": "${input:packageManager}",
+      "args": ["run", "build"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
       },
-      "args": [
-        "run",
-        "build"
-      ],
-      "dependsOn": [
-        "react:lint",
-        "react:type-check"
-      ],
-      "problemMatcher": [
-        "$tsc"
-      ],
       "presentation": {
         "reveal": "always",
         "panel": "shared",
         "clear": true
-      }
+      },
+      "problemMatcher": [
+        "$webpack-build"
+      ]
     },
     {
-      "label": "react:storybook",
-      "detail": "Serve Storybook with hot reload",
+      "label": "react:test",
+      "detail": "Run React tests",
       "type": "shell",
-      "command": "npm",
-      "windows": {
-        "command": "npm.cmd"
-      },
-      "args": [
-        "run",
-        "storybook",
-        "--",
-        "--port",
-        "${input:storybookPort}"
-      ],
-      "isBackground": true,
-      "problemMatcher": [
-        "$tsc-watch"
-      ],
+      "command": "${input:packageManager}",
+      "args": ["test"],
+      "group": "test",
       "presentation": {
         "reveal": "always",
         "panel": "dedicated",
-        "clear": false
-      }
-    },
-    {
-      "label": "react:test-components",
-      "detail": "Execute component tests with Jest and React Testing Library",
-      "type": "shell",
-      "command": "npm",
-      "windows": {
-        "command": "npm.cmd"
+        "clear": true
       },
-      "args": [
-        "run",
-        "test",
-        "--",
-        "--watchAll=false",
-        "--runInBand"
-      ],
       "problemMatcher": [
         "$jest-watch"
-      ],
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      }
+      ]
     },
     {
-      "label": "react:bundle-analyze",
-      "detail": "Inspect bundle composition using source-map-explorer or webpack analyzer",
+      "label": "react:test-coverage",
+      "detail": "Run tests with coverage",
       "type": "shell",
-      "command": "npm",
-      "windows": {
-        "command": "npm.cmd"
-      },
-      "args": [
-        "run",
-        "analyze",
-        "--",
-        "--port",
-        "${input:bundleAnalyzerPort}"
-      ],
-      "problemMatcher": [
-        "$webpack"
-      ],
+      "command": "${input:packageManager}",
+      "args": ["test", "--", "--coverage", "--watchAll=false"],
+      "group": "test",
       "presentation": {
         "reveal": "always",
         "panel": "dedicated",
         "clear": true
-      }
+      },
+      "problemMatcher": [
+        "$jest-watch"
+      ]
+    },
+    {
+      "label": "react:storybook-start",
+      "detail": "Start Storybook development server",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["run", "storybook"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "react:storybook-build",
+      "detail": "Build Storybook for deployment",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["run", "build-storybook"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "react:generate-component",
+      "detail": "Generate new React component with tests and stories",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "mkdir -p src/components/${input:componentName} && cd src/components/${input:componentName} && cat > ${input:componentName}.tsx << 'EOF'\nimport React from 'react';\nimport './${input:componentName}.css';\n\ninterface ${input:componentName}Props {\n  children?: React.ReactNode;\n}\n\nexport const ${input:componentName}: React.FC<${input:componentName}Props> = ({ children }) => {\n  return (\n    <div className=\"${input:componentName}\">\n      {children}\n    </div>\n  );\n};\n\nexport default ${input:componentName};\nEOF\ncat > ${input:componentName}.test.tsx << 'EOF'\nimport { render, screen } from '@testing-library/react';\nimport ${input:componentName} from './${input:componentName}';\n\ntest('renders ${input:componentName}', () => {\n  render(<${input:componentName}>Test content</${input:componentName}>);\n  expect(screen.getByText('Test content')).toBeInTheDocument();\n});\nEOF\ncat > ${input:componentName}.stories.tsx << 'EOF'\nimport type { Meta, StoryObj } from '@storybook/react';\nimport { ${input:componentName} } from './${input:componentName}';\n\nconst meta: Meta<typeof ${input:componentName}> = {\n  title: 'Components/${input:componentName}',\n  component: ${input:componentName},\n  parameters: {\n    layout: 'centered',\n  },\n  tags: ['autodocs'],\n};\n\nexport default meta;\ntype Story = StoryObj<typeof meta>;\n\nexport const Default: Story = {\n  args: {\n    children: 'Default ${input:componentName}',\n  },\n};\nEOF\ntouch ${input:componentName}.css && echo 'Component ${input:componentName} generated successfully!'"
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-Command",
+          "New-Item -ItemType Directory -Path \"src/components/${input:componentName}\" -Force; Set-Location \"src/components/${input:componentName}\"; @'\nimport React from 'react';\nimport './${input:componentName}.css';\n\ninterface ${input:componentName}Props {\n  children?: React.ReactNode;\n}\n\nexport const ${input:componentName}: React.FC<${input:componentName}Props> = ({ children }) => {\n  return (\n    <div className=\"${input:componentName}\">\n      {children}\n    </div>\n  );\n};\n\nexport default ${input:componentName};\n'@ | Out-File -FilePath '${input:componentName}.tsx' -Encoding utf8"
+        ]
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "react:analyze-bundle",
+      "detail": "Analyze bundle size",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["run", "analyze"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "dependsOn": "react:build",
+      "problemMatcher": []
+    },
+    {
+      "label": "react:lighthouse-audit",
+      "detail": "Run Lighthouse performance audit",
+      "type": "shell",
+      "command": "lighthouse",
+      "args": [
+        "http://localhost:3000",
+        "--output=html",
+        "--output-path=./lighthouse-report.html",
+        "--view"
+      ],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "react:accessibility-test",
+      "detail": "Run accessibility tests with axe",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["run", "test:a11y"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "react:visual-test",
+      "detail": "Run visual regression tests",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["run", "test:visual"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "react:e2e-test",
+      "detail": "Run end-to-end tests with Cypress",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["run", "cypress:run"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": [
+        "$cypress"
+      ]
+    },
+    {
+      "label": "react:e2e-open",
+      "detail": "Open Cypress test runner",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["run", "cypress:open"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
     },
     {
       "label": "react:pwa-audit",
-      "detail": "Run Lighthouse PWA audit via npx",
+      "detail": "Audit PWA compliance",
       "type": "shell",
-      "command": "npx",
-      "windows": {
-        "command": "npx.cmd"
-      },
+      "command": "lighthouse",
       "args": [
-        "lighthouse",
-        "${input:pwaAuditUrl}",
-        "--view",
+        "http://localhost:3000",
         "--only-categories=pwa",
-        "--chrome-flags=--headless"
+        "--output=html",
+        "--output-path=./pwa-audit.html"
       ],
-      "problemMatcher": [
-        "$lighthousePwa"
-      ],
+      "group": "test",
       "presentation": {
         "reveal": "always",
         "panel": "shared",
         "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "react:serve-build",
+      "detail": "Serve production build locally",
+      "type": "shell",
+      "command": "npx",
+      "args": ["serve", "-s", "${input:buildDirectory}", "-l", "5000"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "dependsOn": "react:build",
+      "problemMatcher": []
+    },
+    {
+      "label": "react:deploy-gh-pages",
+      "detail": "Deploy to GitHub Pages",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["run", "deploy"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "dependsOn": "react:build",
+      "problemMatcher": []
+    },
+    {
+      "label": "react:workflow-complete",
+      "detail": "Complete React workflow: test, build, analyze, audit",
+      "dependsOn": [
+        "react:test-coverage",
+        "react:build",
+        "react:analyze-bundle",
+        "react:lighthouse-audit",
+        "react:accessibility-test"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
       }
     }
   ],
   "problemMatchers": [
     {
-      "name": "$webpack",
-      "owner": "javascript",
-      "fileLocation": [
-        "relative",
-        "${workspaceFolder}"
-      ],
-      "pattern": {
-        "regexp": "^ERROR in (.*):(\\d+):(\\d+)\\s-\\s(.*)$",
-        "file": 1,
-        "line": 2,
-        "column": 3,
-        "message": 4
-      }
+      "name": "$webpack-dev-server",
+      "owner": "webpack",
+      "fileLocation": "relative",
+      "pattern": [
+        {
+          "regexp": "^ERROR in (.*)$",
+          "file": 1
+        },
+        {
+          "regexp": "^(.*)\\((\\d+),(\\d+)\\):\\s+(error|warning|info)\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      ]
     },
     {
-      "name": "$lighthousePwa",
-      "owner": "report",
-      "fileLocation": "absolute",
+      "name": "$webpack-build",
+      "owner": "webpack",
+      "fileLocation": "relative",
+      "pattern": [
+        {
+          "regexp": "^ERROR in (.*)$",
+          "file": 1
+        },
+        {
+          "regexp": "^\\s+Line (\\d+):(\\d+):\\s+(.*)$",
+          "line": 1,
+          "column": 2,
+          "message": 3
+        }
+      ]
+    },
+    {
+      "name": "$cypress",
+      "owner": "cypress",
+      "fileLocation": "relative",
       "pattern": {
-        "regexp": "^\u2717?\\s*PWA\\s+score:\\s+(.*)$",
-        "message": 1
+        "regexp": "^\\s+(.*)\\s+\\((.*):(\\d+):(\\d+)\\)$",
+        "message": 1,
+        "file": 2,
+        "line": 3,
+        "column": 4
       }
     }
   ]

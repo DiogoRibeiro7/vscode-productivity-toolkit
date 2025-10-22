@@ -1,284 +1,345 @@
 {
+  "_fileLocation": "/tasks/javascript/",
   "_metadata": {
     "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
     "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
-    "description": "VS Code tasks for Node.js backend workflows including database operations, testing, security, and release automation.",
+    "description": "VS Code tasks for Node.js server development: Express, API testing, database management, and deployment.",
     "version": "1.0.0"
   },
   "version": "2.0.0",
   "inputs": [
     {
-      "id": "nodeEntryPoint",
-      "type": "promptString",
-      "description": "Entry point file for the Node.js service",
-      "default": "src/index.ts"
+      "id": "packageManager",
+      "type": "pickString",
+      "description": "Package manager to use",
+      "options": ["npm", "yarn", "pnpm"],
+      "default": "npm"
     },
     {
-      "id": "apiCollection",
+      "id": "serverFile",
       "type": "promptString",
-      "description": "Postman or Hoppscotch collection file for API tests",
-      "default": "tests/api/collection.json"
+      "description": "Main server file",
+      "default": "server.js"
     },
     {
-      "id": "dockerImageTag",
+      "id": "port",
       "type": "promptString",
-      "description": "Docker image tag for the service",
-      "default": "diogoribeiro7/vscode-productivity-node:latest"
+      "description": "Server port",
+      "default": "3000"
     },
     {
-      "id": "npmPublishTag",
+      "id": "databaseUrl",
       "type": "promptString",
-      "description": "Release tag to use when publishing to npm",
-      "default": "latest"
-    },
-    {
-      "id": "auditLevel",
-      "type": "promptString",
-      "description": "Minimum vulnerability level for npm audit (low|moderate|high|critical)",
-      "default": "moderate"
+      "description": "Database connection URL",
+      "default": "mongodb://localhost:27017/myapp"
     }
   ],
   "tasks": [
     {
-      "label": "node:dev-server",
-      "detail": "Start Express or Fastify development server with live reload",
+      "label": "node:start",
+      "detail": "Start Node.js server",
       "type": "shell",
-      "command": "npm",
-      "windows": {
-        "command": "npm.cmd"
+      "command": "node",
+      "args": ["${input:serverFile}"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
       },
-      "args": [
-        "run",
-        "dev"
-      ],
-      "isBackground": true,
-      "problemMatcher": [
-        "$tsc-watch"
-      ],
       "presentation": {
         "reveal": "always",
         "panel": "dedicated",
-        "clear": false
-      }
+        "clear": true
+      },
+      "problemMatcher": [
+        "$node-server"
+      ]
+    },
+    {
+      "label": "node:dev",
+      "detail": "Start development server with nodemon",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["run", "dev"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": [
+        "$node-server"
+      ]
+    },
+    {
+      "label": "node:debug",
+      "detail": "Start server in debug mode",
+      "type": "shell",
+      "command": "node",
+      "args": ["--inspect", "${input:serverFile}"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": [
+        "$node-server"
+      ]
+    },
+    {
+      "label": "node:test-api",
+      "detail": "Run API tests",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["run", "test:api"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": [
+        "$jest-watch"
+      ]
+    },
+    {
+      "label": "node:test-integration",
+      "detail": "Run integration tests",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["run", "test:integration"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": [
+        "$jest-watch"
+      ]
     },
     {
       "label": "node:db-migrate",
-      "detail": "Apply database migrations using the configured ORM",
+      "detail": "Run database migrations",
       "type": "shell",
-      "command": "npm",
-      "windows": {
-        "command": "npm.cmd"
-      },
-      "args": [
-        "run",
-        "migrate"
-      ],
-      "problemMatcher": [
-        "$node-stacktrace"
-      ],
+      "command": "${input:packageManager}",
+      "args": ["run", "db:migrate"],
+      "group": "build",
       "presentation": {
         "reveal": "always",
         "panel": "shared",
         "clear": true
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "node:db-seed",
-      "detail": "Seed the database with deterministic data",
+      "detail": "Seed database with test data",
       "type": "shell",
-      "command": "npm",
-      "windows": {
-        "command": "npm.cmd"
-      },
-      "args": [
-        "run",
-        "seed"
-      ],
-      "problemMatcher": [
-        "$node-stacktrace"
-      ],
+      "command": "${input:packageManager}",
+      "args": ["run", "db:seed"],
+      "group": "build",
       "presentation": {
         "reveal": "always",
         "panel": "shared",
         "clear": true
-      }
+      },
+      "problemMatcher": []
     },
     {
-      "label": "node:api-test",
-      "detail": "Run API integration tests via Newman or other CLI tooling",
+      "label": "node:db-reset",
+      "detail": "Reset database (drop, migrate, seed)",
       "type": "shell",
-      "command": "npx",
-      "windows": {
-        "command": "npx.cmd"
-      },
-      "args": [
-        "newman",
-        "run",
-        "${input:apiCollection}",
-        "--env-var",
-        "baseUrl=http://localhost:3000",
-        "--color"
-      ],
-      "problemMatcher": [
-        "$newman"
-      ],
+      "command": "${input:packageManager}",
+      "args": ["run", "db:reset"],
+      "group": "build",
       "presentation": {
         "reveal": "always",
         "panel": "shared",
         "clear": true
-      }
+      },
+      "problemMatcher": []
     },
     {
-      "label": "node:docker-build",
-      "detail": "Build and tag a Docker image for the Node.js service",
+      "label": "node:generate-docs",
+      "detail": "Generate API documentation",
       "type": "shell",
-      "command": "docker",
-      "windows": {
-        "command": "docker.exe"
-      },
-      "args": [
-        "build",
-        "--file",
-        "Dockerfile",
-        "--tag",
-        "${input:dockerImageTag}",
-        "."
-      ],
-      "problemMatcher": [
-        "$docker"
-      ],
+      "command": "${input:packageManager}",
+      "args": ["run", "docs:generate"],
+      "group": "build",
       "presentation": {
         "reveal": "always",
         "panel": "shared",
         "clear": true
-      }
+      },
+      "problemMatcher": []
     },
     {
-      "label": "node:npm-publish",
-      "detail": "Publish the package to npm with provenance checks",
+      "label": "node:health-check",
+      "detail": "Check server health endpoint",
       "type": "shell",
-      "command": "npm",
+      "command": "curl",
+      "args": ["-f", "http://localhost:${input:port}/health"],
       "windows": {
-        "command": "npm.cmd"
+        "command": "powershell",
+        "args": [
+          "-Command",
+          "try { Invoke-RestMethod -Uri 'http://localhost:${input:port}/health' -Method Get } catch { Write-Error 'Health check failed' }"
+        ]
       },
-      "args": [
-        "publish",
-        "--access",
-        "public",
-        "--tag",
-        "${input:npmPublishTag}",
-        "--provenance"
-      ],
-      "problemMatcher": [
-        "$npm-publish"
-      ],
+      "group": "test",
       "presentation": {
         "reveal": "always",
         "panel": "shared",
         "clear": true
-      }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "node:load-test",
+      "detail": "Run load tests with artillery",
+      "type": "shell",
+      "command": "${input:packageManager}",
+      "args": ["run", "test:load"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
     },
     {
       "label": "node:security-audit",
-      "detail": "Audit dependencies for known vulnerabilities",
+      "detail": "Security audit with npm audit and snyk",
       "type": "shell",
-      "command": "npm",
-      "windows": {
-        "command": "npm.cmd"
-      },
+      "command": "bash",
       "args": [
-        "audit",
-        "--production",
-        "--audit-level",
-        "${input:auditLevel}"
+        "-c",
+        "${input:packageManager} audit && snyk test"
       ],
-      "problemMatcher": [
-        "$npm-audit"
-      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-Command",
+          "${input:packageManager} audit; snyk test"
+        ]
+      },
+      "group": "test",
       "presentation": {
         "reveal": "always",
         "panel": "shared",
         "clear": true
-      }
+      },
+      "problemMatcher": []
     },
     {
-      "label": "node:profile",
-      "detail": "Profile server performance using Clinic Flame",
+      "label": "node:pm2-start",
+      "detail": "Start application with PM2",
       "type": "shell",
-      "command": "npx",
-      "windows": {
-        "command": "npx.cmd"
-      },
-      "args": [
-        "clinic",
-        "flame",
-        "--on-port",
-        "'ready'",
-        "--",
-        "node",
-        "${input:nodeEntryPoint}"
-      ],
-      "problemMatcher": [
-        "$node-stacktrace"
-      ],
+      "command": "pm2",
+      "args": ["start", "ecosystem.config.js"],
+      "group": "build",
       "presentation": {
         "reveal": "always",
         "panel": "shared",
         "clear": true
-      }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "node:pm2-stop",
+      "detail": "Stop PM2 processes",
+      "type": "shell",
+      "command": "pm2",
+      "args": ["stop", "all"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "node:pm2-logs",
+      "detail": "View PM2 logs",
+      "type": "shell",
+      "command": "pm2",
+      "args": ["logs"],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "node:docker-build",
+      "detail": "Build Docker image for Node.js app",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "build",
+        "-t", "${workspaceFolderBasename}:latest",
+        "."
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": [
+        "$docker-build"
+      ]
+    },
+    {
+      "label": "node:docker-run",
+      "detail": "Run Node.js app in Docker container",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-p", "${input:port}:${input:port}",
+        "${workspaceFolderBasename}:latest"
+      ],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "dependsOn": "node:docker-build",
+      "problemMatcher": []
     }
   ],
   "problemMatchers": [
     {
-      "name": "$node-stacktrace",
+      "name": "$node-server",
       "owner": "node",
-      "fileLocation": [
-        "relative",
-        "${workspaceFolder}"
-      ],
-      "pattern": {
-        "regexp": "^\\s*at\\s+(?:.*\\()?(.+):(\\d+):(\\d+)\\)?$",
-        "file": 1,
-        "line": 2,
-        "column": 3
-      }
+      "fileLocation": "absolute",
+      "pattern": [
+        {
+          "regexp": "^Error: (.*)$",
+          "message": 1
+        },
+        {
+          "regexp": "^\\s+at\\s+(.*):(\\d+):(\\d+)$",
+          "file": 1,
+          "line": 2,
+          "column": 3
+        }
+      ]
     },
     {
-      "name": "$docker",
+      "name": "$docker-build",
       "owner": "docker",
       "fileLocation": "absolute",
       "pattern": {
-        "regexp": "^unable to (.*)$",
-        "message": 1
-      }
-    },
-    {
-      "name": "$npm-publish",
-      "owner": "npm",
-      "fileLocation": "absolute",
-      "pattern": {
-        "regexp": "^npm ERR! (.*)$",
-        "message": 1
-      }
-    },
-    {
-      "name": "$npm-audit",
-      "owner": "npm",
-      "fileLocation": "absolute",
-      "pattern": {
-        "regexp": "^# npm audit (.*)$",
-        "message": 1
-      }
-    },
-    {
-      "name": "$newman",
-      "owner": "test",
-      "fileLocation": [
-        "relative",
-        "${workspaceFolder}"
-      ],
-      "pattern": {
-        "regexp": "^\u2716\\s+([^:]+):(\\d+)(?::(\\d+))?\\s+-\\s+(.*)$",
+        "regexp": "^(.*)\\s+(\\d+)\\s+(\\d+)\\s+(.*)$",
         "file": 1,
         "line": 2,
         "column": 3,

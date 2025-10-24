@@ -1,0 +1,203 @@
+{
+  "taskVersion": "1.0.0",
+  "category": "diagnostics",
+  "displayName": "System Diagnostics",
+  "description": "Comprehensive system diagnostic tasks for troubleshooting, performance monitoring, and health checks",
+  "tasks": [
+    {
+      "label": "Diagnostics: System Information",
+      "type": "shell",
+      "command": "sh",
+      "args": ["-c", "echo '=== OS Info ===' && uname -a && echo '=== Memory ===' && free -h && echo '=== Disk Space ===' && df -h"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Diagnostics: Node.js Environment",
+      "type": "shell",
+      "command": "sh",
+      "args": ["-c", "echo '=== Node Version ===' && node --version && echo '=== NPM Version ===' && npm --version && echo '=== NPM Config ===' && npm config list"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Diagnostics: Python Environment",
+      "type": "shell",
+      "command": "sh",
+      "args": ["-c", "echo '=== Python Version ===' && python --version && echo '=== Pip Version ===' && pip --version && echo '=== Installed Packages ===' && pip list"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Diagnostics: Docker Environment",
+      "type": "shell",
+      "command": "sh",
+      "args": ["-c", "echo '=== Docker Version ===' && docker --version && echo '=== Docker Compose Version ===' && docker-compose --version && echo '=== Docker System Info ===' && docker system df"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Diagnostics: Git Configuration",
+      "type": "shell",
+      "command": "sh",
+      "args": ["-c", "echo '=== Git Version ===' && git --version && echo '=== Git Config ===' && git config --list && echo '=== Git Status ===' && git status"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Diagnostics: Network Connectivity",
+      "type": "shell",
+      "command": "sh",
+      "args": ["-c", "echo '=== DNS Resolution ===' && nslookup google.com && echo '=== Internet Connectivity ===' && ping -c 3 google.com"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Diagnostics: Port Availability",
+      "type": "shell",
+      "command": "netstat",
+      "args": ["-tuln"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Diagnostics: Running Processes",
+      "type": "shell",
+      "command": "ps",
+      "args": ["aux", "|", "grep", "-E", "(node|python|docker)"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Diagnostics: File Permissions Check",
+      "type": "shell",
+      "command": "find",
+      "args": [".", "-type", "f", "-not", "-perm", "644", "-not", "-path", "./.git/*", "-not", "-path", "./node_modules/*"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Diagnostics: Large Files Detection",
+      "type": "shell",
+      "command": "find",
+      "args": [".", "-type", "f", "-size", "+10M", "-not", "-path", "./.git/*", "-not", "-path", "./node_modules/*"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Diagnostics: Performance Monitor",
+      "type": "shell",
+      "command": "top",
+      "args": ["-n", "1", "-b"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Diagnostics: Dependency Tree",
+      "type": "shell",
+      "command": "npm",
+      "args": ["ls", "--depth=2"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Diagnostics: Security Vulnerabilities",
+      "type": "shell",
+      "command": "npm",
+      "args": ["audit", "--audit-level", "moderate"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Diagnostics: Environment Variables",
+      "type": "shell",
+      "command": "env",
+      "args": ["|", "grep", "-E", "(NODE|NPM|PATH|HOME)"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Diagnostics: Generate Full Report",
+      "type": "shell",
+      "command": "sh",
+      "args": ["-c", "echo 'VS Code Productivity Toolkit - Diagnostic Report' > diagnostic_report_$(date +%Y%m%d_%H%M%S).txt && echo '================================================' >> diagnostic_report_$(date +%Y%m%d_%H%M%S).txt && echo 'Generated: $(date)' >> diagnostic_report_$(date +%Y%m%d_%H%M%S).txt && echo '' >> diagnostic_report_$(date +%Y%m%d_%H%M%S).txt"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    }
+  ]
+}

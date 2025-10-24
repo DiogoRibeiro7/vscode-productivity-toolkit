@@ -1,349 +1,167 @@
 {
-  "_fileLocation": "/tasks/javascript/",
-  "_metadata": {
-    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
-    "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
-    "description": "VS Code tasks for Node.js server development: Express, API testing, database management, and deployment.",
-    "version": "1.0.0"
-  },
-  "version": "2.0.0",
-  "inputs": [
-    {
-      "id": "packageManager",
-      "type": "pickString",
-      "description": "Package manager to use",
-      "options": ["npm", "yarn", "pnpm"],
-      "default": "npm"
-    },
-    {
-      "id": "serverFile",
-      "type": "promptString",
-      "description": "Main server file",
-      "default": "server.js"
-    },
-    {
-      "id": "port",
-      "type": "promptString",
-      "description": "Server port",
-      "default": "3000"
-    },
-    {
-      "id": "databaseUrl",
-      "type": "promptString",
-      "description": "Database connection URL",
-      "default": "mongodb://localhost:27017/myapp"
-    }
-  ],
+  "taskVersion": "1.0.0",
+  "category": "node-server",
+  "displayName": "Node.js Server Development",
+  "description": "Node.js server development tasks including Express/Fastify, database management, and deployment automation",
   "tasks": [
     {
-      "label": "node:start",
-      "detail": "Start Node.js server",
+      "label": "Node: Start Development Server",
       "type": "shell",
-      "command": "node",
-      "args": ["${input:serverFile}"],
-      "group": {
-        "kind": "test",
-        "isDefault": true
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": [
-        "$node-server"
-      ]
-    },
-    {
-      "label": "node:dev",
-      "detail": "Start development server with nodemon",
-      "type": "shell",
-      "command": "${input:packageManager}",
+      "command": "npm",
       "args": ["run", "dev"],
-      "group": "test",
+      "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
+        "focus": false,
+        "panel": "shared"
       },
-      "problemMatcher": [
-        "$node-server"
-      ]
+      "isBackground": true
     },
     {
-      "label": "node:debug",
-      "detail": "Start server in debug mode",
+      "label": "Node: Start Production Server",
+      "type": "shell",
+      "command": "npm",
+      "args": ["start"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Node: Debug Server",
       "type": "shell",
       "command": "node",
-      "args": ["--inspect", "${input:serverFile}"],
-      "group": "test",
+      "args": ["--inspect", "server.js"],
+      "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
+        "focus": false,
+        "panel": "shared"
       },
-      "problemMatcher": [
-        "$node-server"
-      ]
+      "isBackground": true
     },
     {
-      "label": "node:test-api",
-      "detail": "Run API tests",
+      "label": "Database: Run Migrations",
       "type": "shell",
-      "command": "${input:packageManager}",
+      "command": "npx",
+      "args": ["knex", "migrate:latest"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Database: Rollback Migration",
+      "type": "shell",
+      "command": "npx",
+      "args": ["knex", "migrate:rollback"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Database: Seed Data",
+      "type": "shell",
+      "command": "npx",
+      "args": ["knex", "seed:run"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "API: Generate Documentation",
+      "type": "shell",
+      "command": "npx",
+      "args": ["swagger-jsdoc", "-d", "swaggerDef.js", "-o", "swagger.json", "routes/*.js"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "API: Test Endpoints",
+      "type": "shell",
+      "command": "npm",
       "args": ["run", "test:api"],
       "group": "test",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": [
-        "$jest-watch"
-      ]
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "node:test-integration",
-      "detail": "Run integration tests",
-      "type": "shell",
-      "command": "${input:packageManager}",
-      "args": ["run", "test:integration"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": [
-        "$jest-watch"
-      ]
-    },
-    {
-      "label": "node:db-migrate",
-      "detail": "Run database migrations",
-      "type": "shell",
-      "command": "${input:packageManager}",
-      "args": ["run", "db:migrate"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "node:db-seed",
-      "detail": "Seed database with test data",
-      "type": "shell",
-      "command": "${input:packageManager}",
-      "args": ["run", "db:seed"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "node:db-reset",
-      "detail": "Reset database (drop, migrate, seed)",
-      "type": "shell",
-      "command": "${input:packageManager}",
-      "args": ["run", "db:reset"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "node:generate-docs",
-      "detail": "Generate API documentation",
-      "type": "shell",
-      "command": "${input:packageManager}",
-      "args": ["run", "docs:generate"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "node:health-check",
-      "detail": "Check server health endpoint",
+      "label": "Health: Check Server Status",
       "type": "shell",
       "command": "curl",
-      "args": ["-f", "http://localhost:${input:port}/health"],
-      "windows": {
-        "command": "powershell",
-        "args": [
-          "-Command",
-          "try { Invoke-RestMethod -Uri 'http://localhost:${input:port}/health' -Method Get } catch { Write-Error 'Health check failed' }"
-        ]
-      },
+      "args": ["-f", "http://localhost:3000/health"],
       "group": "test",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "node:load-test",
-      "detail": "Run load tests with artillery",
+      "label": "PM2: Start Application",
       "type": "shell",
-      "command": "${input:packageManager}",
-      "args": ["run", "test:load"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "node:security-audit",
-      "detail": "Security audit with npm audit and snyk",
-      "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "${input:packageManager} audit && snyk test"
-      ],
-      "windows": {
-        "command": "powershell",
-        "args": [
-          "-Command",
-          "${input:packageManager} audit; snyk test"
-        ]
-      },
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "node:pm2-start",
-      "detail": "Start application with PM2",
-      "type": "shell",
-      "command": "pm2",
-      "args": ["start", "ecosystem.config.js"],
+      "command": "npx",
+      "args": ["pm2", "start", "ecosystem.config.js"],
       "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "node:pm2-stop",
-      "detail": "Stop PM2 processes",
+      "label": "PM2: Monitor Application",
       "type": "shell",
-      "command": "pm2",
-      "args": ["stop", "all"],
+      "command": "npx",
+      "args": ["pm2", "monit"],
       "group": "test",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
+        "focus": false,
+        "panel": "shared"
       },
-      "problemMatcher": []
+      "isBackground": true
     },
     {
-      "label": "node:pm2-logs",
-      "detail": "View PM2 logs",
+      "label": "PM2: Restart Application",
       "type": "shell",
-      "command": "pm2",
-      "args": ["logs"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "node:docker-build",
-      "detail": "Build Docker image for Node.js app",
-      "type": "shell",
-      "command": "docker",
-      "args": [
-        "build",
-        "-t", "${workspaceFolderBasename}:latest",
-        "."
-      ],
+      "command": "npx",
+      "args": ["pm2", "restart", "all"],
       "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": [
-        "$docker-build"
-      ]
-    },
-    {
-      "label": "node:docker-run",
-      "detail": "Run Node.js app in Docker container",
-      "type": "shell",
-      "command": "docker",
-      "args": [
-        "run",
-        "--rm",
-        "-p", "${input:port}:${input:port}",
-        "${workspaceFolderBasename}:latest"
-      ],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "dependsOn": "node:docker-build",
-      "problemMatcher": []
-    }
-  ],
-  "problemMatchers": [
-    {
-      "name": "$node-server",
-      "owner": "node",
-      "fileLocation": "absolute",
-      "pattern": [
-        {
-          "regexp": "^Error: (.*)$",
-          "message": 1
-        },
-        {
-          "regexp": "^\\s+at\\s+(.*):(\\d+):(\\d+)$",
-          "file": 1,
-          "line": 2,
-          "column": 3
-        }
-      ]
-    },
-    {
-      "name": "$docker-build",
-      "owner": "docker",
-      "fileLocation": "absolute",
-      "pattern": {
-        "regexp": "^(.*)\\s+(\\d+)\\s+(\\d+)\\s+(.*)$",
-        "file": 1,
-        "line": 2,
-        "column": 3,
-        "message": 4
+        "focus": false,
+        "panel": "shared"
       }
     }
   ]

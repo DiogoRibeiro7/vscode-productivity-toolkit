@@ -1,24 +1,294 @@
 {
-  "_metadata": {
-    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
-    "version": "1.0.0",
-    "description": "Core VS Code settings optimized for productivity and accessibility.",
-    "compatibility": {
-      "vscode": ">=1.70.0"
-    }
-  },
-  "editor.fontLigatures": false,
-  "editor.fontSize": 14,
+  "// VS Code Productivity Toolkit - Optimized Settings Template
+  "// Copy these settings to your workspace or user settings for enhanced productivity
+  
+  // === TASK AUTOMATION SETTINGS ===
+  "smartTaskDetector.autoDetect": true,
+  "smartTaskDetector.enableNotifications": true,
+  "smartTaskDetector.showWelcomeOnFirstRun": true,
+  "smartTaskDetector.preferredCategories": [
+    "python-general",
+    "javascript-general", 
+    "git-workflows",
+    "general-backup"
+  ],
+  
+  // === EDITOR PRODUCTIVITY ===
   "editor.formatOnSave": true,
-  "editor.minimap.enabled": false,
+  "editor.formatOnPaste": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true,
+    "source.fixAll.eslint": true,
+    "source.fixAll.pylint": true
+  },
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": true
+  },
+  "editor.suggestOnTriggerCharacters": true,
+  "editor.wordBasedSuggestions": true,
+  "editor.parameterHints.enabled": true,
+  "editor.autoClosingBrackets": "always",
+  "editor.autoClosingQuotes": "always",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": true,
+  "editor.linkedEditing": true,
+  "editor.minimap.enabled": true,
+  "editor.minimap.maxColumn": 120,
   "editor.rulers": [80, 120],
-  "editor.stickyScroll.enabled": true,
-  "files.autoSave": "off",
+  "editor.renderWhitespace": "boundary",
+  "editor.trimAutoWhitespace": true,
+  
+  // === FILE MANAGEMENT ===
+  "files.autoSave": "onFocusChange",
   "files.trimTrailingWhitespace": true,
-  "terminal.integrated.fontFamily": "", 
-  "workbench.colorTheme": "Default Dark+",
-  "workbench.iconTheme": "material-icon-theme",
-  "accessibility.signals.visualAlerts.enabled": true,
+  "files.insertFinalNewline": true,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true,
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/coverage": true,
+    "**/.nyc_output": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/*.pyc": true,
+    "**/*.pyo": true,
+    "**/*.egg-info": true
+  },
+  "files.associations": {
+    "*.json": "jsonc",
+    "Dockerfile*": "dockerfile",
+    "docker-compose*.yml": "dockercompose",
+    "requirements*.txt": "pip-requirements",
+    ".env*": "dotenv"
+  },
+  
+  // === SEARCH AND NAVIGATION ===
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/coverage": true,
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/dist": true,
+    "**/build": true
+  },
+  "search.smartCase": true,
+  "search.useGlobalIgnoreFiles": true,
+  "search.useIgnoreFiles": true,
+  
+  // === TERMINAL SETTINGS ===
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.defaultProfile.osx": "zsh", 
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.copyOnSelection": true,
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.cursorStyle": "line",
+  "terminal.integrated.fontFamily": "Monaco, 'Courier New', monospace",
+  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.scrollback": 10000,
+  "terminal.integrated.shell.linux": "/bin/bash",
+  
+  // === TASK RUNNER SETTINGS ===
+  "task.autoDetect": "on",
+  "task.showDecorations": true,
+  "task.problemMatchers.autoDetect": "on",
+  "task.quickOpen.detail": true,
+  "task.quickOpen.history": 30,
+  
+  // === LANGUAGE-SPECIFIC SETTINGS ===
+  
+  // Python
+  "python.defaultInterpreterPath": "./venv/bin/python",
+  "python.formatting.provider": "black",
+  "python.formatting.blackArgs": ["--line-length", "88"],
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+  "python.linting.flake8Enabled": true,
+  "python.linting.mypyEnabled": true,
+  "python.linting.banditEnabled": true,
+  "python.linting.lintOnSave": true,
+  "python.sortImports.args": ["--profile", "black"],
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.nosetestsEnabled": false,
+  "python.testing.pytestArgs": ["."],
+  "python.testing.autoTestDiscoverOnSaveEnabled": true,
+  
+  // JavaScript/TypeScript
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "javascript.suggest.autoImports": true,
+  "typescript.suggest.autoImports": true,
+  "javascript.preferences.quoteStyle": "single",
+  "typescript.preferences.quoteStyle": "single",
+  "eslint.enable": true,
+  "eslint.autoFixOnSave": true,
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  
+  // JSON
+  "json.schemas": [
+    {
+      "fileMatch": ["package.json"],
+      "url": "https://json.schemastore.org/package"
+    },
+    {
+      "fileMatch": ["tsconfig.json", "tsconfig.*.json"],
+      "url": "https://json.schemastore.org/tsconfig"
+    },
+    {
+      "fileMatch": [".vscode/tasks.json"],
+      "url": "https://json.schemastore.org/vscode-tasks"
+    }
+  ],
+  
+  // Docker
+  "docker.languageserver.formatter.ignoreMultilineInstructions": true,
+  
+  // === GIT SETTINGS ===
+  "git.enableSmartCommit": true,
+  "git.autofetch": true,
+  "git.autoStash": true,
+  "git.confirmSync": false,
+  "git.enableStatusBarSync": true,
+  "git.postCommitCommand": "sync",
+  "git.showPushSuccessNotification": true,
+  "git.timeline.showTree": true,
+  "scm.diffDecorations": "all",
+  "scm.alwaysShowProviders": true,
+  
+  // === WORKBENCH SETTINGS ===
+  "workbench.editor.enablePreview": false,
+  "workbench.editor.enablePreviewFromQuickOpen": false,
+  "workbench.startupEditor": "welcomePageInEmptyWorkbench",
+  "workbench.tips.enabled": true,
+  "workbench.tree.indent": 20,
+  "workbench.list.automaticKeyboardNavigation": false,
+  "workbench.commandPalette.history": 50,
+  "workbench.quickOpen.closeOnFocusLost": false,
+  
+  // === EXPLORER SETTINGS ===
   "explorer.confirmDelete": false,
-  "python.analysis.typeCheckingMode": "basic"
+  "explorer.confirmDragAndDrop": false,
+  "explorer.compactFolders": false,
+  "explorer.autoReveal": true,
+  "explorer.decorations.colors": true,
+  "explorer.decorations.badges": true,
+  
+  // === EXTENSION-SPECIFIC SETTINGS ===
+  
+  // Prettier
+  "prettier.singleQuote": true,
+  "prettier.semi": true,
+  "prettier.tabWidth": 2,
+  "prettier.trailingComma": "es5",
+  "prettier.printWidth": 88,
+  "prettier.endOfLine": "lf",
+  
+  // ESLint
+  "eslint.workingDirectories": ["."],
+  "eslint.codeActionsOnSave.mode": "all",
+  
+  // GitLens
+  "gitlens.currentLine.enabled": false,
+  "gitlens.hovers.currentLine.over": "line",
+  "gitlens.codeLens.enabled": false,
+  
+  // Bracket Pair Colorizer (deprecated - using built-in now)
+  "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
+  
+  // Live Server
+  "liveServer.settings.donotShowInfoMsg": true,
+  "liveServer.settings.donotVerifyTags": true,
+  
+  // === PERFORMANCE SETTINGS ===
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/*/**": true,
+    "**/.hg/store/**": true,
+    "**/coverage/**": true,
+    "**/__pycache__/**": true,
+    "**/.pytest_cache/**": true,
+    "**/dist/**": true,
+    "**/build/**": true
+  },
+  "typescript.tsc.autoDetect": "off",
+  "typescript.preferences.includePackageJsonAutoImports": "off",
+  "search.followSymlinks": false,
+  "search.maintainFileSearchCache": true,
+  
+  // === PRODUCTIVITY KEYBOARD SHORTCUTS ===
+  "keyboard.dispatch": "keyCode",
+  
+  // === ACCESSIBILITY ===
+  "editor.accessibilitySupport": "auto",
+  "workbench.reduceMotion": "auto",
+  
+  // === TELEMETRY ===
+  "telemetry.enableTelemetry": false,
+  "telemetry.enableCrashReporter": false,
+  
+  // === PRODUCTIVITY EXTENSIONS RECOMMENDATIONS ===
+  "extensions.ignoreRecommendations": false,
+  
+  // === WORKSPACE-SPECIFIC OVERRIDES ===
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[yaml]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.autoIndent": "advanced"
+  },
+  "[dockerfile]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+  },
+  "[shellscript]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.quickSuggestions": false
+  }
 }

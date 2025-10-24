@@ -1,4 +1,3 @@
-# File Location: /
 # VS Code Productivity Toolkit - Main README
 
 # 🚀 VS Code Productivity Toolkit

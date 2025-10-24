@@ -1,498 +1,202 @@
 {
-  "_fileLocation": "/tasks/git/",
-  "_metadata": {
-    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
-    "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
-    "description": "VS Code tasks for Git workflow automation: branch management, conventional commits, and release automation.",
-    "version": "1.0.0"
-  },
-  "version": "2.0.0",
-  "inputs": [
-    {
-      "id": "branchName",
-      "type": "promptString",
-      "description": "Branch name",
-      "default": "feature/new-feature"
-    },
-    {
-      "id": "commitType",
-      "type": "pickString",
-      "description": "Commit type",
-      "options": ["feat", "fix", "docs", "style", "refactor", "test", "chore"],
-      "default": "feat"
-    },
-    {
-      "id": "commitScope",
-      "type": "promptString",
-      "description": "Commit scope (optional)",
-      "default": ""
-    },
-    {
-      "id": "commitMessage",
-      "type": "promptString",
-      "description": "Commit message",
-      "default": "add new feature"
-    },
-    {
-      "id": "remoteName",
-      "type": "promptString",
-      "description": "Remote name",
-      "default": "origin"
-    },
-    {
-      "id": "tagVersion",
-      "type": "promptString",
-      "description": "Tag version",
-      "default": "v1.0.0"
-    }
-  ],
+  "taskVersion": "1.0.0",
+  "category": "git-workflows",
+  "displayName": "Git Workflow Automation",
+  "description": "Git workflow tasks including branch management, quality gates, and release automation",
   "tasks": [
     {
-      "label": "git:status",
-      "detail": "Show repository status",
+      "label": "Git: Create Feature Branch",
       "type": "shell",
       "command": "git",
-      "args": ["status", "--porcelain", "-b"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:branch-create",
-      "detail": "Create and switch to new branch",
-      "type": "shell",
-      "command": "git",
-      "args": ["checkout", "-b", "${input:branchName}"],
+      "args": ["checkout", "-b", "feature/${input:featureName}"],
       "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:branch-switch",
-      "detail": "Switch to existing branch",
-      "type": "shell",
-      "command": "git",
-      "args": ["checkout", "${input:branchName}"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:branch-list",
-      "detail": "List all branches",
-      "type": "shell",
-      "command": "git",
-      "args": ["branch", "-a", "-vv"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:branch-delete",
-      "detail": "Delete branch (safe)",
-      "type": "shell",
-      "command": "git",
-      "args": ["branch", "-d", "${input:branchName}"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:branch-delete-force",
-      "detail": "Force delete branch",
-      "type": "shell",
-      "command": "git",
-      "args": ["branch", "-D", "${input:branchName}"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:add-all",
-      "detail": "Stage all changes",
-      "type": "shell",
-      "command": "git",
-      "args": ["add", "."],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:add-interactive",
-      "detail": "Interactive staging",
-      "type": "shell",
-      "command": "git",
-      "args": ["add", "-i"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:commit-conventional",
-      "detail": "Conventional commit",
-      "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "if [ -n '${input:commitScope}' ]; then git commit -m '${input:commitType}(${input:commitScope}): ${input:commitMessage}'; else git commit -m '${input:commitType}: ${input:commitMessage}'; fi"
-      ],
-      "windows": {
-        "command": "powershell",
-        "args": [
-          "-Command",
-          "if ('${input:commitScope}' -ne '') { git commit -m '${input:commitType}(${input:commitScope}): ${input:commitMessage}' } else { git commit -m '${input:commitType}: ${input:commitMessage}' }"
-        ]
-      },
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:commit-amend",
-      "detail": "Amend last commit",
-      "type": "shell",
-      "command": "git",
-      "args": ["commit", "--amend", "--no-edit"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:push",
-      "detail": "Push current branch to remote",
-      "type": "shell",
-      "command": "git",
-      "args": ["push", "${input:remoteName}", "HEAD"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:push-force-lease",
-      "detail": "Force push with lease (safer)",
-      "type": "shell",
-      "command": "git",
-      "args": ["push", "--force-with-lease", "${input:remoteName}", "HEAD"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:pull",
-      "detail": "Pull latest changes",
-      "type": "shell",
-      "command": "git",
-      "args": ["pull", "${input:remoteName}"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:pull-rebase",
-      "detail": "Pull with rebase",
-      "type": "shell",
-      "command": "git",
-      "args": ["pull", "--rebase", "${input:remoteName}"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:fetch-all",
-      "detail": "Fetch all remotes",
-      "type": "shell",
-      "command": "git",
-      "args": ["fetch", "--all", "--prune"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:log-oneline",
-      "detail": "Show commit history (oneline)",
-      "type": "shell",
-      "command": "git",
-      "args": ["log", "--oneline", "--graph", "--decorate", "-20"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:log-detailed",
-      "detail": "Show detailed commit history",
-      "type": "shell",
-      "command": "git",
-      "args": ["log", "--graph", "--pretty=format:%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset", "-10"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:diff",
-      "detail": "Show unstaged changes",
-      "type": "shell",
-      "command": "git",
-      "args": ["diff"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:diff-staged",
-      "detail": "Show staged changes",
-      "type": "shell",
-      "command": "git",
-      "args": ["diff", "--staged"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:stash-push",
-      "detail": "Stash current changes",
-      "type": "shell",
-      "command": "git",
-      "args": ["stash", "push", "-m", "WIP: ${input:commitMessage}"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:stash-pop",
-      "detail": "Apply and remove latest stash",
-      "type": "shell",
-      "command": "git",
-      "args": ["stash", "pop"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:stash-list",
-      "detail": "List all stashes",
-      "type": "shell",
-      "command": "git",
-      "args": ["stash", "list"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:tag-create",
-      "detail": "Create annotated tag",
-      "type": "shell",
-      "command": "git",
-      "args": ["tag", "-a", "${input:tagVersion}", "-m", "Release ${input:tagVersion}"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:tag-push",
-      "detail": "Push tags to remote",
-      "type": "shell",
-      "command": "git",
-      "args": ["push", "${input:remoteName}", "--tags"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:tag-list",
-      "detail": "List all tags",
-      "type": "shell",
-      "command": "git",
-      "args": ["tag", "-l", "--sort=-version:refname"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:remote-info",
-      "detail": "Show remote information",
-      "type": "shell",
-      "command": "git",
-      "args": ["remote", "-v"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:clean-dry-run",
-      "detail": "Show what would be cleaned",
-      "type": "shell",
-      "command": "git",
-      "args": ["clean", "-n", "-d"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:clean-untracked",
-      "detail": "Remove untracked files and directories",
-      "type": "shell",
-      "command": "git",
-      "args": ["clean", "-f", "-d"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:reset-hard",
-      "detail": "Reset to last commit (destructive)",
-      "type": "shell",
-      "command": "git",
-      "args": ["reset", "--hard", "HEAD"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "git:workflow-feature",
-      "detail": "Complete feature workflow: add, commit, push",
-      "dependsOn": [
-        "git:add-all",
-        "git:commit-conventional",
-        "git:push"
-      ],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": false
+        "focus": false,
+        "panel": "shared"
       }
     },
     {
-      "label": "git:workflow-release",
-      "detail": "Complete release workflow: tag, push tags",
-      "dependsOn": [
-        "git:tag-create",
-        "git:tag-push"
-      ],
+      "label": "Git: Create Hotfix Branch",
+      "type": "shell",
+      "command": "git",
+      "args": ["checkout", "-b", "hotfix/${input:hotfixName}"],
       "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": false
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Git: Switch to Main Branch",
+      "type": "shell",
+      "command": "git",
+      "args": ["checkout", "main"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Git: Update Main Branch",
+      "type": "shell",
+      "command": "sh",
+      "args": ["-c", "git checkout main && git pull origin main"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Git: Merge Feature to Main",
+      "type": "shell",
+      "command": "sh",
+      "args": ["-c", "git checkout main && git merge feature/${input:featureName} --no-ff"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Git: Interactive Rebase",
+      "type": "shell",
+      "command": "git",
+      "args": ["rebase", "-i", "HEAD~${input:commitCount}"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Git: Squash Commits",
+      "type": "shell",
+      "command": "git",
+      "args": ["reset", "--soft", "HEAD~${input:commitCount}", "&&", "git", "commit", "-m", "${input:commitMessage}"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Git: Check Repository Status",
+      "type": "shell",
+      "command": "git",
+      "args": ["status", "--porcelain"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Git: Show Branch History",
+      "type": "shell",
+      "command": "git",
+      "args": ["log", "--oneline", "--graph", "--decorate", "-10"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Git: Find Large Files",
+      "type": "shell",
+      "command": "git",
+      "args": ["rev-list", "--objects", "--all", "|", "git", "cat-file", "--batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)'", "|", "sed", "-n", "s/^blob //p", "|", "sort", "--numeric-sort", "--key=2", "|", "tail", "-10"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Git: Clean Merged Branches",
+      "type": "shell",
+      "command": "git",
+      "args": ["branch", "--merged", "main", "|", "grep", "-v", "main", "|", "xargs", "-n", "1", "git", "branch", "-d"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Git: Validate Commit Messages",
+      "type": "shell",
+      "command": "commitizen",
+      "args": ["check", "--commit-msg-file", ".git/COMMIT_EDITMSG"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Git: Generate Changelog",
+      "type": "shell",
+      "command": "conventional-changelog",
+      "args": ["-p", "angular", "-i", "CHANGELOG.md", "-s"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Git: Create Release Tag",
+      "type": "shell",
+      "command": "git",
+      "args": ["tag", "-a", "v${input:version}", "-m", "Release version ${input:version}"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Git: Push Tags",
+      "type": "shell",
+      "command": "git",
+      "args": ["push", "origin", "--tags"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
       }
     }
   ]

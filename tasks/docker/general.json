@@ -1,406 +1,208 @@
 {
-  "_fileLocation": "/tasks/docker/",
-  "_metadata": {
-    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
-    "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
-    "description": "VS Code tasks for Docker container management: building, running, security scanning, and optimization.",
-    "version": "1.0.0"
-  },
-  "version": "2.0.0",
-  "inputs": [
-    {
-      "id": "imageName",
-      "type": "promptString",
-      "description": "Docker image name",
-      "default": "${workspaceFolderBasename}"
-    },
-    {
-      "id": "imageTag",
-      "type": "promptString",
-      "description": "Docker image tag",
-      "default": "latest"
-    },
-    {
-      "id": "containerName",
-      "type": "promptString",
-      "description": "Container name",
-      "default": "${workspaceFolderBasename}-container"
-    },
-    {
-      "id": "port",
-      "type": "promptString",
-      "description": "Port mapping (host:container)",
-      "default": "3000:3000"
-    },
-    {
-      "id": "dockerfile",
-      "type": "promptString",
-      "description": "Dockerfile path",
-      "default": "Dockerfile"
-    }
-  ],
+  "taskVersion": "1.0.0",
+  "category": "docker-general",
+  "displayName": "Docker Container Management",
+  "description": "Essential Docker container management tasks including building, running, debugging, and security scanning",
   "tasks": [
     {
-      "label": "docker:build",
-      "detail": "Build Docker image",
+      "label": "Docker: Build Image",
       "type": "shell",
       "command": "docker",
-      "args": [
-        "build",
-        "-t", "${input:imageName}:${input:imageTag}",
-        "-f", "${input:dockerfile}",
-        "."
-      ],
+      "args": ["build", "-t", "${workspaceFolderBasename}:latest", "."],
       "group": {
         "kind": "build",
         "isDefault": true
       },
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": [
-        "$docker-build"
-      ]
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "docker:build-no-cache",
-      "detail": "Build Docker image without cache",
+      "label": "Docker: Build Multi-stage Production",
       "type": "shell",
       "command": "docker",
-      "args": [
-        "build",
-        "--no-cache",
-        "-t", "${input:imageName}:${input:imageTag}",
-        "-f", "${input:dockerfile}",
-        "."
-      ],
+      "args": ["build", "--target", "production", "-t", "${workspaceFolderBasename}:prod", "."],
       "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": [
-        "$docker-build"
-      ]
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "docker:run",
-      "detail": "Run Docker container",
+      "label": "Docker: Run Container",
       "type": "shell",
       "command": "docker",
-      "args": [
-        "run",
-        "--rm",
-        "--name", "${input:containerName}",
-        "-p", "${input:port}",
-        "${input:imageName}:${input:imageTag}"
-      ],
-      "group": {
-        "kind": "test",
-        "isDefault": true
-      },
+      "args": ["run", "-p", "3000:3000", "${workspaceFolderBasename}:latest"],
+      "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
+        "focus": false,
+        "panel": "shared"
       },
-      "dependsOn": "docker:build",
-      "problemMatcher": []
+      "isBackground": true
     },
     {
-      "label": "docker:run-detached",
-      "detail": "Run Docker container in detached mode",
+      "label": "Docker: Run Interactive Shell",
       "type": "shell",
       "command": "docker",
-      "args": [
-        "run",
-        "-d",
-        "--name", "${input:containerName}",
-        "-p", "${input:port}",
-        "${input:imageName}:${input:imageTag}"
-      ],
+      "args": ["run", "-it", "--rm", "${workspaceFolderBasename}:latest", "/bin/bash"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Docker: Debug Container",
+      "type": "shell",
+      "command": "docker",
+      "args": ["run", "-p", "3000:3000", "-p", "9229:9229", "${workspaceFolderBasename}:latest"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Docker: List Images",
+      "type": "shell",
+      "command": "docker",
+      "args": ["images", "--filter", "reference=${workspaceFolderBasename}*"],
       "group": "test",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "dependsOn": "docker:build",
-      "problemMatcher": []
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "docker:run-interactive",
-      "detail": "Run Docker container interactively",
+      "label": "Docker: List Running Containers",
       "type": "shell",
       "command": "docker",
-      "args": [
-        "run",
-        "--rm",
-        "-it",
-        "--name", "${input:containerName}",
-        "-p", "${input:port}",
-        "${input:imageName}:${input:imageTag}",
-        "/bin/bash"
-      ],
+      "args": ["ps"],
       "group": "test",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "dependsOn": "docker:build",
-      "problemMatcher": []
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "docker:stop",
-      "detail": "Stop running container",
+      "label": "Docker: Stop All Containers",
       "type": "shell",
       "command": "docker",
-      "args": ["stop", "${input:containerName}"],
-      "group": "test",
+      "args": ["stop", "$(docker ps -q)"],
+      "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "docker:logs",
-      "detail": "View container logs",
+      "label": "Docker: Clean Unused Resources",
       "type": "shell",
       "command": "docker",
-      "args": ["logs", "-f", "${input:containerName}"],
-      "group": "test",
+      "args": ["system", "prune", "-f"],
+      "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": []
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "docker:exec-bash",
-      "detail": "Execute bash in running container",
-      "type": "shell",
-      "command": "docker",
-      "args": ["exec", "-it", "${input:containerName}", "/bin/bash"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "docker:inspect",
-      "detail": "Inspect container details",
-      "type": "shell",
-      "command": "docker",
-      "args": ["inspect", "${input:containerName}"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "docker:stats",
-      "detail": "Show container resource usage",
-      "type": "shell",
-      "command": "docker",
-      "args": ["stats", "${input:containerName}"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "docker:security-scan-trivy",
-      "detail": "Security scan with Trivy",
+      "label": "Docker: Security Scan with Trivy",
       "type": "shell",
       "command": "trivy",
-      "args": ["image", "${input:imageName}:${input:imageTag}"],
+      "args": ["image", "${workspaceFolderBasename}:latest"],
       "group": "test",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "docker:security-scan-snyk",
-      "detail": "Security scan with Snyk",
+      "label": "Docker: Vulnerability Scan with Snyk",
       "type": "shell",
       "command": "snyk",
-      "args": ["container", "test", "${input:imageName}:${input:imageTag}"],
+      "args": ["container", "test", "${workspaceFolderBasename}:latest"],
       "group": "test",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "docker:analyze-image",
-      "detail": "Analyze image layers with dive",
-      "type": "shell",
-      "command": "dive",
-      "args": ["${input:imageName}:${input:imageTag}"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "docker:push",
-      "detail": "Push image to registry",
-      "type": "shell",
-      "command": "docker",
-      "args": ["push", "${input:imageName}:${input:imageTag}"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "dependsOn": "docker:build",
-      "problemMatcher": []
-    },
-    {
-      "label": "docker:tag",
-      "detail": "Tag image for registry",
-      "type": "shell",
-      "command": "docker",
-      "args": [
-        "tag", 
-        "${input:imageName}:${input:imageTag}",
-        "registry.example.com/${input:imageName}:${input:imageTag}"
-      ],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "docker:prune-images",
-      "detail": "Remove unused images",
-      "type": "shell",
-      "command": "docker",
-      "args": ["image", "prune", "-f"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "docker:prune-containers",
-      "detail": "Remove unused containers",
-      "type": "shell",
-      "command": "docker",
-      "args": ["container", "prune", "-f"],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "docker:system-info",
-      "detail": "Show Docker system information",
-      "type": "shell",
-      "command": "docker",
-      "args": ["system", "info"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "docker:list-images",
-      "detail": "List all Docker images",
-      "type": "shell",
-      "command": "docker",
-      "args": ["images"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "docker:list-containers",
-      "detail": "List all containers",
-      "type": "shell",
-      "command": "docker",
-      "args": ["ps", "-a"],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "docker:workflow-complete",
-      "detail": "Complete Docker workflow: build, scan, test, deploy",
-      "dependsOn": [
-        "docker:build",
-        "docker:security-scan-trivy",
-        "docker:run-detached",
-        "docker:tag"
-      ],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": false
+        "focus": false,
+        "panel": "shared"
       }
-    }
-  ],
-  "problemMatchers": [
+    },
     {
-      "name": "$docker-build",
-      "owner": "docker",
-      "fileLocation": "relative",
-      "pattern": [
-        {
-          "regexp": "^Step (\\d+)/(\\d+) : (.*)$",
-          "message": 3
-        },
-        {
-          "regexp": "^ERROR: (.*)$",
-          "message": 1
-        }
-      ]
+      "label": "Docker: Check Image Layers",
+      "type": "shell",
+      "command": "docker",
+      "args": ["history", "${workspaceFolderBasename}:latest"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Docker: Optimize Image Size",
+      "type": "shell",
+      "command": "docker",
+      "args": ["run", "--rm", "-v", "/var/run/docker.sock:/var/run/docker.sock", "wagoodman/dive:latest", "${workspaceFolderBasename}:latest"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Docker: Tag for Registry",
+      "type": "shell",
+      "command": "docker",
+      "args": ["tag", "${workspaceFolderBasename}:latest", "${input:registryUrl}/${workspaceFolderBasename}:${input:tagVersion}"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Docker: Push to Registry",
+      "type": "shell",
+      "command": "docker",
+      "args": ["push", "${input:registryUrl}/${workspaceFolderBasename}:${input:tagVersion}"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
     }
   ]
 }

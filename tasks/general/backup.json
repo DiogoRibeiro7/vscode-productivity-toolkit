@@ -1,297 +1,189 @@
 {
-  "_fileLocation": "/tasks/general/",
-  "_metadata": {
-    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
-    "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
-    "description": "VS Code tasks for backup and maintenance: file backup, configuration export, and workspace cleanup.",
-    "version": "1.0.0"
-  },
-  "version": "2.0.0",
-  "inputs": [
-    {
-      "id": "backupLocation",
-      "type": "promptString",
-      "description": "Backup directory path",
-      "default": "../backups"
-    },
-    {
-      "id": "backupName",
-      "type": "promptString",
-      "description": "Backup name prefix",
-      "default": "${workspaceFolderBasename}"
-    },
-    {
-      "id": "compressionLevel",
-      "type": "pickString",
-      "description": "Compression level",
-      "options": ["1", "5", "9"],
-      "default": "5"
-    },
-    {
-      "id": "excludePatterns",
-      "type": "promptString",
-      "description": "Exclude patterns (comma-separated)",
-      "default": "node_modules,__pycache__,.git,dist,build"
-    }
-  ],
+  "taskVersion": "1.0.0",
+  "category": "backup-maintenance",
+  "displayName": "Backup and Maintenance",
+  "description": "System backup, cleanup, and maintenance tasks for project health and data protection",
   "tasks": [
     {
-      "label": "backup:workspace-full",
-      "detail": "Create full workspace backup",
+      "label": "Backup: Create Project Archive",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "mkdir -p '${input:backupLocation}' && tar --exclude-from=<(echo '${input:excludePatterns}' | tr ',' '\\n') -czf '${input:backupLocation}/${input:backupName}_full_$(date +%Y%m%d_%H%M%S).tar.gz' -C .. '$(basename \"$PWD\")' && echo 'Full backup completed'"
-      ],
-      "windows": {
-        "command": "powershell",
-        "args": [
-          "-Command",
-          "New-Item -ItemType Directory -Path '${input:backupLocation}' -Force; $excludePatterns = '${input:excludePatterns}' -split ','; $backupPath = '${input:backupLocation}/${input:backupName}_full_' + (Get-Date -Format 'yyyyMMdd_HHmmss') + '.zip'; Compress-Archive -Path . -DestinationPath $backupPath -Force; Write-Host 'Full backup completed'"
-        ]
-      },
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "backup:workspace-incremental",
-      "detail": "Create incremental backup (changed files only)",
-      "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "mkdir -p '${input:backupLocation}' && find . -newer '${input:backupLocation}/.last_backup' 2>/dev/null | grep -v -E '(node_modules|__pycache__|.git|dist|build)' | tar -czf '${input:backupLocation}/${input:backupName}_incremental_$(date +%Y%m%d_%H%M%S).tar.gz' -T - && touch '${input:backupLocation}/.last_backup' && echo 'Incremental backup completed'"
-      ],
-      "windows": {
-        "command": "powershell",
-        "args": [
-          "-Command",
-          "New-Item -ItemType Directory -Path '${input:backupLocation}' -Force; $lastBackup = '${input:backupLocation}/.last_backup'; $changedFiles = Get-ChildItem -Recurse | Where-Object { $_.LastWriteTime -gt (Get-Date '1/1/1970') }; $backupPath = '${input:backupLocation}/${input:backupName}_incremental_' + (Get-Date -Format 'yyyyMMdd_HHmmss') + '.zip'; Compress-Archive -Path $changedFiles -DestinationPath $backupPath -Force; Set-Content -Path $lastBackup -Value (Get-Date); Write-Host 'Incremental backup completed'"
-        ]
-      },
+      "command": "tar",
+      "args": ["-czf", "../${workspaceFolderBasename}_backup_$(date +%Y%m%d_%H%M%S).tar.gz", "--exclude=node_modules", "--exclude=.git", "--exclude=build", "--exclude=dist", "."],
       "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "backup:source-only",
-      "detail": "Backup source code only",
+      "label": "Backup: Git Repository Mirror",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "mkdir -p '${input:backupLocation}' && tar -czf '${input:backupLocation}/${input:backupName}_source_$(date +%Y%m%d_%H%M%S).tar.gz' --include='*.py' --include='*.js' --include='*.ts' --include='*.jsx' --include='*.tsx' --include='*.html' --include='*.css' --include='*.json' --include='*.md' --include='*.yml' --include='*.yaml' --exclude-from=<(echo '${input:excludePatterns}' | tr ',' '\\n') . && echo 'Source backup completed'"
-      ],
-      "windows": {
-        "command": "powershell",
-        "args": [
-          "-Command",
-          "New-Item -ItemType Directory -Path '${input:backupLocation}' -Force; $sourceFiles = Get-ChildItem -Recurse -Include '*.py','*.js','*.ts','*.jsx','*.tsx','*.html','*.css','*.json','*.md','*.yml','*.yaml' | Where-Object { $_.FullName -notmatch '(node_modules|__pycache__|.git|dist|build)' }; $backupPath = '${input:backupLocation}/${input:backupName}_source_' + (Get-Date -Format 'yyyyMMdd_HHmmss') + '.zip'; Compress-Archive -Path $sourceFiles -DestinationPath $backupPath -Force; Write-Host 'Source backup completed'"
-        ]
-      },
+      "command": "git",
+      "args": ["clone", "--mirror", ".", "../${workspaceFolderBasename}_mirror_$(date +%Y%m%d_%H%M%S).git"],
       "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "backup:vscode-settings",
-      "detail": "Backup VS Code settings and tasks",
+      "label": "Backup: Database Export",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "mkdir -p '${input:backupLocation}' && if [ -d '.vscode' ]; then tar -czf '${input:backupLocation}/${input:backupName}_vscode_$(date +%Y%m%d_%H%M%S).tar.gz' .vscode && echo 'VS Code settings backup completed'; else echo 'No .vscode directory found'; fi"
-      ],
-      "windows": {
-        "command": "powershell",
-        "args": [
-          "-Command",
-          "New-Item -ItemType Directory -Path '${input:backupLocation}' -Force; if (Test-Path '.vscode') { $backupPath = '${input:backupLocation}/${input:backupName}_vscode_' + (Get-Date -Format 'yyyyMMdd_HHmmss') + '.zip'; Compress-Archive -Path '.vscode' -DestinationPath $backupPath -Force; Write-Host 'VS Code settings backup completed' } else { Write-Host 'No .vscode directory found' }"
-        ]
-      },
+      "command": "pg_dump",
+      "args": ["-h", "${input:dbHost}", "-U", "${input:dbUser}", "-d", "${input:dbName}", "-f", "backup_db_$(date +%Y%m%d_%H%M%S).sql"],
       "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "backup:git-repository",
-      "detail": "Backup Git repository (including history)",
+      "label": "Cleanup: Remove Node Modules",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "mkdir -p '${input:backupLocation}' && git bundle create '${input:backupLocation}/${input:backupName}_git_$(date +%Y%m%d_%H%M%S).bundle' --all && echo 'Git repository backup completed'"
-      ],
-      "windows": {
-        "command": "powershell",
-        "args": [
-          "-Command",
-          "New-Item -ItemType Directory -Path '${input:backupLocation}' -Force; $backupPath = '${input:backupLocation}/${input:backupName}_git_' + (Get-Date -Format 'yyyyMMdd_HHmmss') + '.bundle'; git bundle create $backupPath --all; Write-Host 'Git repository backup completed'"
-        ]
-      },
+      "command": "find",
+      "args": [".", "-name", "node_modules", "-type", "d", "-exec", "rm", "-rf", "{}", "+"],
       "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "backup:list-backups",
-      "detail": "List all backups",
+      "label": "Cleanup: Remove Build Artifacts",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "if [ -d '${input:backupLocation}' ]; then ls -lah '${input:backupLocation}' | grep '${input:backupName}'; else echo 'No backup directory found'; fi"
-      ],
-      "windows": {
-        "command": "powershell",
-        "args": [
-          "-Command",
-          "if (Test-Path '${input:backupLocation}') { Get-ChildItem -Path '${input:backupLocation}' | Where-Object { $_.Name -like '*${input:backupName}*' } | Format-Table Name, Length, LastWriteTime } else { Write-Host 'No backup directory found' }"
-        ]
-      },
+      "command": "rm",
+      "args": ["-rf", "build", "dist", "*.tgz", "coverage"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Cleanup: Remove Log Files",
+      "type": "shell",
+      "command": "find",
+      "args": [".", "-name", "*.log", "-type", "f", "-delete"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Cleanup: Docker System Prune",
+      "type": "shell",
+      "command": "docker",
+      "args": ["system", "prune", "-a", "-f"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Maintenance: Update Dependencies",
+      "type": "shell",
+      "command": "npm",
+      "args": ["update"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Maintenance: Check for Outdated Packages",
+      "type": "shell",
+      "command": "npm",
+      "args": ["outdated"],
       "group": "test",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "backup:cleanup-old",
-      "detail": "Cleanup backups older than 30 days",
+      "label": "Maintenance: Rebuild Package Lock",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "if [ -d '${input:backupLocation}' ]; then find '${input:backupLocation}' -name '*${input:backupName}*' -type f -mtime +30 -delete && echo 'Old backups cleaned up'; else echo 'No backup directory found'; fi"
-      ],
-      "windows": {
-        "command": "powershell",
-        "args": [
-          "-Command",
-          "if (Test-Path '${input:backupLocation}') { Get-ChildItem -Path '${input:backupLocation}' | Where-Object { $_.Name -like '*${input:backupName}*' -and $_.LastWriteTime -lt (Get-Date).AddDays(-30) } | Remove-Item -Force; Write-Host 'Old backups cleaned up' } else { Write-Host 'No backup directory found' }"
-        ]
-      },
+      "command": "sh",
+      "args": ["-c", "rm package-lock.json && npm install"],
       "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "backup:restore-workspace",
-      "detail": "Restore workspace from backup",
+      "label": "Maintenance: Git Garbage Collection",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "echo 'Available backups:' && ls -1 '${input:backupLocation}'/*${input:backupName}*.tar.gz 2>/dev/null | head -10 && echo 'To restore, manually extract the desired backup file'"
-      ],
-      "windows": {
-        "command": "powershell",
-        "args": [
-          "-Command",
-          "Write-Host 'Available backups:'; Get-ChildItem -Path '${input:backupLocation}' | Where-Object { $_.Name -like '*${input:backupName}*.zip' } | Select-Object -First 10 | Format-Table Name; Write-Host 'To restore, manually extract the desired backup file'"
-        ]
-      },
+      "command": "git",
+      "args": ["gc", "--aggressive", "--prune=now"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Maintenance: Verify Repository Integrity",
+      "type": "shell",
+      "command": "git",
+      "args": ["fsck", "--full"],
       "group": "test",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "backup:verify-integrity",
-      "detail": "Verify backup file integrity",
+      "label": "Archive: Create Release Bundle",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "for backup in '${input:backupLocation}'/*${input:backupName}*.tar.gz; do echo \"Checking $backup\"; tar -tzf \"$backup\" >/dev/null && echo \"✓ OK\" || echo \"✗ CORRUPTED\"; done"
-      ],
-      "windows": {
-        "command": "powershell",
-        "args": [
-          "-Command",
-          "Get-ChildItem -Path '${input:backupLocation}' | Where-Object { $_.Name -like '*${input:backupName}*.zip' } | ForEach-Object { Write-Host \"Checking $($_.Name)\"; try { Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::OpenRead($_.FullName).Dispose(); Write-Host '✓ OK' } catch { Write-Host '✗ CORRUPTED' } }"
-        ]
-      },
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "backup:schedule-daily",
-      "detail": "Setup daily backup schedule",
-      "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "echo 'To setup daily backups, add this to your crontab:' && echo '0 2 * * * cd \"$(pwd)\" && code --wait .vscode/tasks.json && /usr/bin/timeout 300 code --folder-uri \"$(pwd)\" --command workbench.action.tasks.runTask backup:workspace-incremental' && echo 'Run: crontab -e'"
-      ],
-      "windows": {
-        "command": "powershell",
-        "args": [
-          "-Command",
-          "Write-Host 'To setup daily backups on Windows, use Task Scheduler:'; Write-Host '1. Open Task Scheduler'; Write-Host '2. Create Basic Task'; Write-Host '3. Set trigger to Daily at 2:00 AM'; Write-Host '4. Set action to run: code --command workbench.action.tasks.runTask backup:workspace-incremental'"
-        ]
-      },
+      "command": "sh",
+      "args": ["-c", "npm run build && tar -czf ${workspaceFolderBasename}_v${input:version}.tar.gz build/"],
       "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "backup:complete-workflow",
-      "detail": "Complete backup workflow: full, settings, git, cleanup",
-      "dependsOn": [
-        "backup:workspace-full",
-        "backup:vscode-settings",
-        "backup:git-repository",
-        "backup:cleanup-old"
-      ],
+      "label": "Archive: Generate Project Manifest",
+      "type": "shell",
+      "command": "sh",
+      "args": ["-c", "find . -type f -not -path './.git/*' -not -path './node_modules/*' | sort > project_manifest_$(date +%Y%m%d).txt"],
       "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": false
+        "focus": false,
+        "panel": "shared"
       }
     }
   ]

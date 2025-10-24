@@ -1,468 +1,207 @@
 {
-  "_fileLocation": "/tasks/docker/",
-  "_metadata": {
-    "license": "MIT License - Copyright (c) 2025 Diogo Ribeiro",
-    "maintainer": "Diogo Ribeiro <dfr@esmad.ipp.pt>",
-    "description": "VS Code tasks for Docker Compose orchestration: multi-service management, development environments, and deployment.",
-    "version": "1.0.0"
-  },
-  "version": "2.0.0",
-  "inputs": [
-    {
-      "id": "composeFile",
-      "type": "promptString",
-      "description": "Docker Compose file path",
-      "default": "docker-compose.yml"
-    },
-    {
-      "id": "environment",
-      "type": "pickString",
-      "description": "Environment to use",
-      "options": ["development", "staging", "production"],
-      "default": "development"
-    },
-    {
-      "id": "serviceName",
-      "type": "promptString",
-      "description": "Service name (leave empty for all services)",
-      "default": ""
-    },
-    {
-      "id": "projectName",
-      "type": "promptString",
-      "description": "Project name",
-      "default": "${workspaceFolderBasename}"
-    }
-  ],
+  "taskVersion": "1.0.0",
+  "category": "docker-compose",
+  "displayName": "Docker Compose Orchestration",
+  "description": "Docker Compose tasks for multi-service application management, including development and production environments",
   "tasks": [
     {
-      "label": "compose:up",
-      "detail": "Start all services",
+      "label": "Compose: Start All Services",
       "type": "shell",
       "command": "docker-compose",
-      "args": [
-        "-f", "${input:composeFile}",
-        "-p", "${input:projectName}",
-        "up"
-      ],
-      "group": {
-        "kind": "test",
-        "isDefault": true
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": [
-        "$docker-compose"
-      ]
-    },
-    {
-      "label": "compose:up-detached",
-      "detail": "Start all services in detached mode",
-      "type": "shell",
-      "command": "docker-compose",
-      "args": [
-        "-f", "${input:composeFile}",
-        "-p", "${input:projectName}",
-        "up", "-d"
-      ],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": [
-        "$docker-compose"
-      ]
-    },
-    {
-      "label": "compose:up-build",
-      "detail": "Start services and rebuild images",
-      "type": "shell",
-      "command": "docker-compose",
-      "args": [
-        "-f", "${input:composeFile}",
-        "-p", "${input:projectName}",
-        "up", "--build"
-      ],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": [
-        "$docker-compose"
-      ]
-    },
-    {
-      "label": "compose:down",
-      "detail": "Stop and remove all services",
-      "type": "shell",
-      "command": "docker-compose",
-      "args": [
-        "-f", "${input:composeFile}",
-        "-p", "${input:projectName}",
-        "down"
-      ],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "compose:down-volumes",
-      "detail": "Stop services and remove volumes",
-      "type": "shell",
-      "command": "docker-compose",
-      "args": [
-        "-f", "${input:composeFile}",
-        "-p", "${input:projectName}",
-        "down", "-v"
-      ],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "compose:restart",
-      "detail": "Restart all services",
-      "type": "shell",
-      "command": "docker-compose",
-      "args": [
-        "-f", "${input:composeFile}",
-        "-p", "${input:projectName}",
-        "restart"
-      ],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "compose:restart-service",
-      "detail": "Restart specific service",
-      "type": "shell",
-      "command": "docker-compose",
-      "args": [
-        "-f", "${input:composeFile}",
-        "-p", "${input:projectName}",
-        "restart", "${input:serviceName}"
-      ],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "compose:logs",
-      "detail": "View logs for all services",
-      "type": "shell",
-      "command": "docker-compose",
-      "args": [
-        "-f", "${input:composeFile}",
-        "-p", "${input:projectName}",
-        "logs", "-f"
-      ],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "compose:logs-service",
-      "detail": "View logs for specific service",
-      "type": "shell",
-      "command": "docker-compose",
-      "args": [
-        "-f", "${input:composeFile}",
-        "-p", "${input:projectName}",
-        "logs", "-f", "${input:serviceName}"
-      ],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "compose:ps",
-      "detail": "List running services",
-      "type": "shell",
-      "command": "docker-compose",
-      "args": [
-        "-f", "${input:composeFile}",
-        "-p", "${input:projectName}",
-        "ps"
-      ],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "compose:exec",
-      "detail": "Execute command in service",
-      "type": "shell",
-      "command": "docker-compose",
-      "args": [
-        "-f", "${input:composeFile}",
-        "-p", "${input:projectName}",
-        "exec", "${input:serviceName}", "/bin/bash"
-      ],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "compose:build",
-      "detail": "Build all services",
-      "type": "shell",
-      "command": "docker-compose",
-      "args": [
-        "-f", "${input:composeFile}",
-        "-p", "${input:projectName}",
-        "build"
-      ],
+      "args": ["up", "-d"],
       "group": {
         "kind": "build",
         "isDefault": true
       },
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": [
-        "$docker-build"
-      ]
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "compose:build-no-cache",
-      "detail": "Build services without cache",
+      "label": "Compose: Start Development Environment",
       "type": "shell",
       "command": "docker-compose",
-      "args": [
-        "-f", "${input:composeFile}",
-        "-p", "${input:projectName}",
-        "build", "--no-cache"
-      ],
+      "args": ["-f", "docker-compose.yml", "-f", "docker-compose.dev.yml", "up", "-d"],
       "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": [
-        "$docker-build"
-      ]
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "compose:pull",
-      "detail": "Pull latest images for all services",
+      "label": "Compose: Start Production Environment",
       "type": "shell",
       "command": "docker-compose",
-      "args": [
-        "-f", "${input:composeFile}",
-        "-p", "${input:projectName}",
-        "pull"
-      ],
+      "args": ["-f", "docker-compose.yml", "-f", "docker-compose.prod.yml", "up", "-d"],
       "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "compose:validate",
-      "detail": "Validate compose file",
+      "label": "Compose: Build and Start",
       "type": "shell",
       "command": "docker-compose",
-      "args": [
-        "-f", "${input:composeFile}",
-        "config"
-      ],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": [
-        "$docker-compose-config"
-      ]
-    },
-    {
-      "label": "compose:dev-setup",
-      "detail": "Setup development environment",
-      "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "docker-compose -f ${input:composeFile} -p ${input:projectName} down && docker-compose -f ${input:composeFile} -p ${input:projectName} build && docker-compose -f ${input:composeFile} -p ${input:projectName} up -d"
-      ],
-      "windows": {
-        "command": "powershell",
-        "args": [
-          "-Command",
-          "docker-compose -f ${input:composeFile} -p ${input:projectName} down; docker-compose -f ${input:composeFile} -p ${input:projectName} build; docker-compose -f ${input:composeFile} -p ${input:projectName} up -d"
-        ]
-      },
+      "args": ["up", "--build", "-d"],
       "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": [
-        "$docker-compose"
-      ]
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "compose:test-integration",
-      "detail": "Run integration tests with compose",
-      "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "docker-compose -f ${input:composeFile} -f docker-compose.test.yml -p ${input:projectName}-test up --build --abort-on-container-exit"
-      ],
-      "windows": {
-        "command": "powershell", 
-        "args": [
-          "-Command",
-          "docker-compose -f ${input:composeFile} -f docker-compose.test.yml -p ${input:projectName}-test up --build --abort-on-container-exit"
-        ]
-      },
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "compose:scale-service",
-      "detail": "Scale specific service",
+      "label": "Compose: Stop All Services",
       "type": "shell",
       "command": "docker-compose",
-      "args": [
-        "-f", "${input:composeFile}",
-        "-p", "${input:projectName}",
-        "up", "-d", "--scale", "${input:serviceName}=3"
-      ],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "compose:backup-volumes",
-      "detail": "Backup all volumes",
-      "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "mkdir -p backups && docker run --rm -v ${input:projectName}_data:/data -v $(pwd)/backups:/backup alpine tar czf /backup/volumes_$(date +%Y%m%d_%H%M%S).tar.gz -C /data ."
-      ],
-      "windows": {
-        "command": "powershell",
-        "args": [
-          "-Command",
-          "New-Item -ItemType Directory -Path backups -Force; docker run --rm -v ${input:projectName}_data:/data -v ${PWD}/backups:/backup alpine tar czf /backup/volumes_$(Get-Date -Format 'yyyyMMdd_HHmmss').tar.gz -C /data ."
-        ]
-      },
+      "args": ["down"],
       "group": "build",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
-      },
-      "problemMatcher": []
+        "focus": false,
+        "panel": "shared"
+      }
     },
     {
-      "label": "compose:health-check",
-      "detail": "Check health of all services",
+      "label": "Compose: Stop and Remove Volumes",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "docker-compose -f ${input:composeFile} -p ${input:projectName} ps | grep -E '(healthy|unhealthy)' || echo 'No health checks configured'"
-      ],
-      "windows": {
-        "command": "powershell",
-        "args": [
-          "-Command",
-          "docker-compose -f ${input:composeFile} -p ${input:projectName} ps"
-        ]
-      },
+      "command": "docker-compose",
+      "args": ["down", "-v"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Compose: View Service Logs",
+      "type": "shell",
+      "command": "docker-compose",
+      "args": ["logs", "-f"],
       "group": "test",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "clear": true
+        "focus": false,
+        "panel": "shared"
       },
-      "problemMatcher": []
-    }
-  ],
-  "problemMatchers": [
-    {
-      "name": "$docker-compose",
-      "owner": "docker-compose",
-      "fileLocation": "relative",
-      "pattern": [
-        {
-          "regexp": "^ERROR: (.*)$",
-          "message": 1
-        },
-        {
-          "regexp": "^(.*)\\|\\s+(.*)$",
-          "file": 1,
-          "message": 2
-        }
-      ]
+      "isBackground": true
     },
     {
-      "name": "$docker-compose-config",
-      "owner": "docker-compose",
-      "fileLocation": "relative",
-      "pattern": {
-        "regexp": "^ERROR: (.*)$",
-        "message": 1
+      "label": "Compose: View Specific Service Logs",
+      "type": "shell",
+      "command": "docker-compose",
+      "args": ["logs", "-f", "${input:serviceName}"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Compose: Check Service Status",
+      "type": "shell",
+      "command": "docker-compose",
+      "args": ["ps"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Compose: Execute Shell in Service",
+      "type": "shell",
+      "command": "docker-compose",
+      "args": ["exec", "${input:serviceName}", "/bin/bash"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Compose: Restart Service",
+      "type": "shell",
+      "command": "docker-compose",
+      "args": ["restart", "${input:serviceName}"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Compose: Scale Service",
+      "type": "shell",
+      "command": "docker-compose",
+      "args": ["up", "-d", "--scale", "${input:serviceName}=${input:replicaCount}"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Compose: Validate Configuration",
+      "type": "shell",
+      "command": "docker-compose",
+      "args": ["config"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Compose: Health Check",
+      "type": "shell",
+      "command": "docker-compose",
+      "args": ["exec", "-T", "${input:serviceName}", "curl", "-f", "http://localhost:${input:healthPort}/health"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Compose: Database Backup",
+      "type": "shell",
+      "command": "docker-compose",
+      "args": ["exec", "-T", "db", "pg_dump", "-U", "${input:dbUser}", "${input:dbName}", ">", "backup_$(date +%Y%m%d_%H%M%S).sql"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
       }
     }
   ]

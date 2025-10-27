@@ -222,7 +222,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Download extension artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: vscode-extension-${{ github.sha }}
           path: ./artifacts

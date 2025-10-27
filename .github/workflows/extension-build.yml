@@ -101,7 +101,7 @@ jobs:
         working-directory: extensions/smart-task-detector
 
       - name: Upload extension artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: vscode-extension-${{ github.sha }}
           path: extensions/smart-task-detector/*.vsix

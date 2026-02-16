@@ -198,7 +198,7 @@
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.56.0",
     "eslint": "^10.0.0",
-    "glob": "^13.0.0",
+    "glob": "^13.0.3",
     "mocha": "^11.7.5",
     "typescript": "^5.9.3",
     "ts-loader": "^9.4.1",

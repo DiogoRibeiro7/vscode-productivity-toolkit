@@ -197,7 +197,7 @@
     "@types/node": "25.x",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.53.1",
-    "eslint": "^9.39.2",
+    "eslint": "^10.0.0",
     "glob": "^13.0.0",
     "mocha": "^11.7.5",
     "typescript": "^5.9.3",

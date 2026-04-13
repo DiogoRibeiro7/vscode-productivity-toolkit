@@ -2,7 +2,7 @@
 # MIT License - Copyright (c) 2025 Diogo Ribeiro
 
 [build-system]
-requires = ["setuptools>=65.0", "wheel"]
+requires = ["setuptools>=82.0.1", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]

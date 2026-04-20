@@ -202,7 +202,7 @@
     "mocha": "^11.7.5",
     "typescript": "^5.9.3",
     "ts-loader": "^9.4.1",
-    "webpack": "^5.105.4",
+    "webpack": "^5.106.2",
     "webpack-cli": "^7.0.2",
     "@vscode/test-electron": "^2.5.2"
   },

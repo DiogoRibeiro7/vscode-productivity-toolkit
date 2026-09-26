@@ -1,9 +1,9 @@
 import * as path from 'path';
-import * as Mocha from 'mocha';
-import * as glob from 'glob';
 
-export function run(): Promise<void> {
-    // Create the mocha test
+import { glob } from 'glob';
+import Mocha = require('mocha');
+
+export async function run(): Promise<void> {
     const mocha = new Mocha({
         ui: 'tdd',
         color: true,
@@ -11,34 +11,20 @@ export function run(): Promise<void> {
         reporter: 'spec'
     });
 
-    const testsRoot = path.resolve(__dirname, '..');
+    const testsRoot = path.resolve(__dirname);
+    const files = await glob('**/*.test.js', { cwd: testsRoot });
 
-    return new Promise((c, e) => {
-        const testFiles = new glob.Glob('**/**.test.js', { cwd: testsRoot });
-        const testFileStream = testFiles.stream();
+    for (const file of files) {
+        mocha.addFile(path.resolve(testsRoot, file));
+    }
 
-        testFileStream.on('data', (file) => {
-            mocha.addFile(path.resolve(testsRoot, file));
-        });
-        
-        testFileStream.on('error', (err) => {
-            e(err);
-        });
-        
-        testFileStream.on('end', () => {
-            try {
-                // Run the mocha test
-                mocha.run((failures) => {
-                    if (failures > 0) {
-                        e(new Error(`${failures} tests failed.`));
-                    } else {
-                        c();
-                    }
-                });
-            } catch (err) {
-                console.error(err);
-                e(err);
+    await new Promise<void>((resolve, reject) => {
+        mocha.run(failures => {
+            if (failures > 0) {
+                reject(new Error(`${failures} extension test(s) failed`));
+                return;
             }
+            resolve();
         });
     });
 }

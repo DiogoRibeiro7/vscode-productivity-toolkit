@@ -186,7 +186,7 @@ select_categories() {
       return
     fi
     IFS=',' read -ra indices <<< "${response}"
-    local selection=""
+    local -a selection=()
     local valid=true
     for value in "${indices[@]}"; do
       value="$(echo "${value}" | xargs)"
@@ -201,10 +201,10 @@ select_categories() {
         valid=false
         break
       fi
-      selection+="${map_entries[$((position-1))]}\n"
+      selection+=("${map_entries[$((position-1))]}")
     done
-    if [[ "${valid}" == true && -n "${selection}" ]]; then
-      printf '%s' "${selection}" | sort -u
+    if [[ "${valid}" == true && ${#selection[@]} -gt 0 ]]; then
+      printf '%s\n' "${selection[@]}" | sort -u
       return
     fi
     echo "Please enter a valid selection."
@@ -290,7 +290,7 @@ merge_tasks() {
   local -a sources=("$@")
   local py
   py="$(python_bin)"
-  "${py}" <<'PYTHON'
+  "${py}" - "${output_path}" "${existing_path}" "${sources[@]}" <<'PYTHON'
 import json
 import sys
 from pathlib import Path
@@ -380,7 +380,7 @@ install_extensions() {
   local py
   py="$(python_bin)"
   local ids
-  ids=$("${py}" <<'PYTHON'
+  ids=$("${py}" - "${extensions_file}" <<'PYTHON'
 import json
 import sys
 from pathlib import Path
@@ -391,7 +391,7 @@ for item in data.get("recommendations", []):
     if item:
         print(item)
 PYTHON
-"${extensions_file}")
+)
   while IFS= read -r extension; do
     [[ -z "${extension}" ]] && continue
     if [[ "${DRY_RUN}" == true ]]; then
@@ -428,7 +428,7 @@ validate_tasks() {
   local path="$1"
   local py
   py="$(python_bin)"
-  if "${py}" <<'PYTHON'
+  if "${py}" - "${path}" <<'PYTHON'
 import json
 import sys
 from pathlib import Path
@@ -439,7 +439,7 @@ with path.open("r", encoding="utf-8") as handle:
 if not data.get("tasks"):
     sys.exit(2)
 PYTHON
-"${path}" >/dev/null 2>&1; then
+  then
     log "INFO" "VS Code tasks.json validated successfully."
   else
     log "WARN" "tasks.json validation encountered an issue; please verify manually."

@@ -79,7 +79,7 @@ repos:
 
   # Security scanning
   - repo: https://github.com/pycqa/bandit
-    rev: 1.7.5
+    rev: 1.9.4
     hooks:
       - id: bandit
         args: ['-r', 'toolkit', 'qa', 'scripts']

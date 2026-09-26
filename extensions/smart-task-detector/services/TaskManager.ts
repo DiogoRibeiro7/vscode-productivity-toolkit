@@ -1,4 +1,4 @@
-import axios from 'axios';
+import * as https from 'https';
 import * as vscode from 'vscode';
 
 import { DetectedProject } from './ProjectDetector';
@@ -166,14 +166,41 @@ export class TaskManager {
             )
             .replace(/\/$/, '');
 
-        const response = await axios.get<TaskCategory>(`${baseUrl}/${relativePath}`, {
-            timeout: 10000,
-            responseType: 'json'
-        });
-        const loaded = response.data;
+        const loaded = await this.fetchJson<TaskCategory>(`${baseUrl}/${relativePath}`);
         loaded.category = this.normaliseCategory(loaded.category || category);
         this.categories.set(category, loaded);
         return loaded;
+    }
+
+    private fetchJson<T>(url: string): Promise<T> {
+        return new Promise((resolve, reject) => {
+            const request = https.get(url, { timeout: 10000 }, response => {
+                const status = response.statusCode ?? 0;
+                if (status < 200 || status >= 300) {
+                    response.resume();
+                    reject(new Error(`Task repository returned HTTP ${status}`));
+                    return;
+                }
+
+                response.setEncoding('utf8');
+                let body = '';
+                response.on('data', chunk => {
+                    body += chunk;
+                });
+                response.on('end', () => {
+                    try {
+                        resolve(JSON.parse(body) as T);
+                    } catch (error) {
+                        reject(new Error(`Invalid task repository response: ${String(error)}`));
+                    }
+                });
+            });
+
+            request.on('timeout', () => {
+                request.destroy(new Error('Task repository request timed out'));
+            });
+            request.on('error', reject);
+        });
     }
 
     private isTaskExport(value: unknown): value is { version: string; tasks: Task[] } {

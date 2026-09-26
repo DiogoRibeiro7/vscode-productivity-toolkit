@@ -345,7 +345,7 @@ function Install-Extensions {
             Write-Log -Level 'INFO' -Message "Ensured extension $extension is installed."
         }
         catch {
-            Write-Log -Level 'WARN' -Message "Failed to install extension $extension: $($_.Exception.Message)"
+            Write-Log -Level 'WARN' -Message "Failed to install extension ${extension}: $($_.Exception.Message)"
         }
     }
 }

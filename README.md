@@ -9,6 +9,8 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![VS Code](https://img.shields.io/badge/VS%20Code-Extension-blue.svg)](https://marketplace.visualstudio.com/items?itemName=diogoribeiro7.smart-task-detector)
 
+[Documentation](https://diogoribeiro7.github.io/vscode-productivity-toolkit/) · [Getting started](https://diogoribeiro7.github.io/vscode-productivity-toolkit/getting-started/) · [Task catalog](https://diogoribeiro7.github.io/vscode-productivity-toolkit/task-reference/)
+
 ## 🎯 What is This?
 
 The VS Code Productivity Toolkit is a comprehensive automation solution that transforms your development workflow by providing:

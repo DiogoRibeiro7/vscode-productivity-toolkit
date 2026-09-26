@@ -35,6 +35,7 @@ import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlparse
 from typing import Callable, Dict, Iterable, List, Optional, Sequence, Set
 
 try:
@@ -188,9 +189,13 @@ class TaskInstaller:
 
         relative = str(category.relative_path).replace(os.sep, "/")
         url = f"{self.remote_base_url}/{relative}"
+        parsed = urlparse(url)
+        if parsed.scheme != "https" or not parsed.hostname:
+            raise InstallationError("Remote task repository must use HTTPS")
+
         LOGGER.info("Downloading task definition from %s", url)
         try:
-            with urllib.request.urlopen(url, timeout=60) as response:
+            with urllib.request.urlopen(url, timeout=60) as response:  # nosec B310 - HTTPS URL validated above
                 data = response.read().decode("utf-8")
         except Exception as exc:  # pragma: no cover - network path
             raise InstallationError(f"Failed to download {url}: {exc}") from exc

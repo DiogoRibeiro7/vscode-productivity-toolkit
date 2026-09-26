@@ -98,7 +98,7 @@ jobs:
         working-directory: extensions/smart-task-detector
 
       - name: Package extension
-        run: npx vsce package --no-dependencies
+        run: npx --yes @vscode/vsce package --no-dependencies
         working-directory: extensions/smart-task-detector
 
       - name: Upload extension artifact
@@ -213,7 +213,7 @@ jobs:
         working-directory: extensions/smart-task-detector
 
       - name: Validate extension manifest
-        run: npx vsce ls
+        run: npx --yes @vscode/vsce ls
         working-directory: extensions/smart-task-detector
 
   publish-ready:
@@ -258,7 +258,7 @@ jobs:
       - name: Publish to VS Code Marketplace
         env:
           VSCE_PAT: ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
-        run: npx vsce publish --no-dependencies
+        run: npx --yes @vscode/vsce publish --no-dependencies
         working-directory: extensions/smart-task-detector
 
       - name: Create GitHub Release

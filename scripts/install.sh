@@ -238,7 +238,7 @@ fetch_task_file() {
   IFS='|' read -r key _ _ path <<< "${entry}"
   if [[ -n "${REMOTE_BASE_URL}" ]]; then
     local relative
-    relative="${path#${SOURCE_ROOT}/}"
+    relative="${path#"${SOURCE_ROOT}"/}"
     relative="${relative#./}"
     local url
     url="${REMOTE_BASE_URL%/}/${relative// /%20}"
@@ -386,7 +386,9 @@ import sys
 from pathlib import Path
 
 path = Path(sys.argv[1])
-data = json.loads(path.read_text(encoding="utf-8"))
+content = path.read_text(encoding="utf-8")
+content = "\n".join(line.split("//", 1)[0] for line in content.splitlines())
+data = json.loads(content)
 for item in data.get("recommendations", []):
     if item:
         print(item)

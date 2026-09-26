@@ -43,7 +43,7 @@ log() {
     return
   fi
   local payload
-  payload=$(printf '{"timestamp":"%s","level":"%s","message":"%s"}' "${timestamp}" "${level}" "${message//"/\"}")
+  payload=$(printf '{"timestamp":"%s","level":"%s","message":"%s"}' "${timestamp}" "${level}" "${message//\"/\\\"}")
   if [[ "${level}" == "ERROR" ]]; then
     >&2 echo "${payload}"
   else
@@ -186,7 +186,7 @@ select_categories() {
       return
     fi
     IFS=',' read -ra indices <<< "${response}"
-    local selection=""
+    local -a selection=()
     local valid=true
     for value in "${indices[@]}"; do
       value="$(echo "${value}" | xargs)"
@@ -201,10 +201,10 @@ select_categories() {
         valid=false
         break
       fi
-      selection+="${map_entries[$((position-1))]}\n"
+      selection+=("${map_entries[$((position-1))]}")
     done
-    if [[ "${valid}" == true && -n "${selection}" ]]; then
-      printf '%s' "${selection}" | sort -u
+    if [[ "${valid}" == true && ${#selection[@]} -gt 0 ]]; then
+      printf '%s\n' "${selection[@]}" | sort -u
       return
     fi
     echo "Please enter a valid selection."
@@ -238,7 +238,7 @@ fetch_task_file() {
   IFS='|' read -r key _ _ path <<< "${entry}"
   if [[ -n "${REMOTE_BASE_URL}" ]]; then
     local relative
-    relative="${path#${SOURCE_ROOT}/}"
+    relative="${path#"${SOURCE_ROOT}"/}"
     relative="${relative#./}"
     local url
     url="${REMOTE_BASE_URL%/}/${relative// /%20}"
@@ -290,7 +290,7 @@ merge_tasks() {
   local -a sources=("$@")
   local py
   py="$(python_bin)"
-  "${py}" <<'PYTHON'
+  "${py}" - "${output_path}" "${existing_path}" "${sources[@]}" <<'PYTHON'
 import json
 import sys
 from pathlib import Path
@@ -380,18 +380,20 @@ install_extensions() {
   local py
   py="$(python_bin)"
   local ids
-  ids=$("${py}" <<'PYTHON'
+  ids=$("${py}" - "${extensions_file}" <<'PYTHON'
 import json
 import sys
 from pathlib import Path
 
 path = Path(sys.argv[1])
-data = json.loads(path.read_text(encoding="utf-8"))
+content = path.read_text(encoding="utf-8")
+content = "\n".join(line.split("//", 1)[0] for line in content.splitlines())
+data = json.loads(content)
 for item in data.get("recommendations", []):
     if item:
         print(item)
 PYTHON
-"${extensions_file}")
+)
   while IFS= read -r extension; do
     [[ -z "${extension}" ]] && continue
     if [[ "${DRY_RUN}" == true ]]; then
@@ -428,7 +430,7 @@ validate_tasks() {
   local path="$1"
   local py
   py="$(python_bin)"
-  if "${py}" <<'PYTHON'
+  if "${py}" - "${path}" <<'PYTHON'
 import json
 import sys
 from pathlib import Path
@@ -439,7 +441,7 @@ with path.open("r", encoding="utf-8") as handle:
 if not data.get("tasks"):
     sys.exit(2)
 PYTHON
-"${path}" >/dev/null 2>&1; then
+  then
     log "INFO" "VS Code tasks.json validated successfully."
   else
     log "WARN" "tasks.json validation encountered an issue; please verify manually."
@@ -458,7 +460,11 @@ main() {
   local vscode_dir
   vscode_dir="$(ensure_vscode_dir)"
 
-  mapfile -t selected < <(select_categories)
+  local -a selected=()
+  local entry
+  while IFS= read -r entry; do
+    selected+=("${entry}")
+  done < <(select_categories)
   if [[ ${#selected[@]} -eq 0 ]]; then
     log "ERROR" "No categories selected; installation aborted."
     exit 1

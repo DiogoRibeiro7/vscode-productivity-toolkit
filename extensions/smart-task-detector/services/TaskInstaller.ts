@@ -33,10 +33,10 @@ export class TaskInstaller {
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-        if (!workspaceFolder) {
-            throw new Error('No workspace folder found');
-        }
-        this.tasksFilePath = path.join(workspaceFolder.uri.fsPath, '.vscode', 'tasks.json');
+        const basePath = workspaceFolder?.uri.fsPath ?? context.globalStorageUri.fsPath;
+        this.tasksFilePath = workspaceFolder
+            ? path.join(basePath, '.vscode', 'tasks.json')
+            : path.join(basePath, 'tasks.json');
     }
 
     async installTask(task: Task): Promise<void> {

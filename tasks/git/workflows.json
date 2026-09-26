@@ -1,4 +1,5 @@
 {
+  "version": "2.0.0",
   "taskVersion": "1.0.0",
   "category": "git-workflows",
   "displayName": "Git Workflow Automation",

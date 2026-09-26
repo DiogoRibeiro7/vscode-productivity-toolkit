@@ -27,6 +27,7 @@ import argparse
 import json
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -35,6 +36,7 @@ import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlparse
 from typing import Callable, Dict, Iterable, List, Optional, Sequence, Set
 
 try:
@@ -188,9 +190,13 @@ class TaskInstaller:
 
         relative = str(category.relative_path).replace(os.sep, "/")
         url = f"{self.remote_base_url}/{relative}"
+        parsed = urlparse(url)
+        if parsed.scheme != "https" or not parsed.hostname:
+            raise InstallationError("Remote task repository must use HTTPS")
+
         LOGGER.info("Downloading task definition from %s", url)
         try:
-            with urllib.request.urlopen(url, timeout=60) as response:
+            with urllib.request.urlopen(url, timeout=60) as response:  # nosec B310 - HTTPS URL validated above
                 data = response.read().decode("utf-8")
         except Exception as exc:  # pragma: no cover - network path
             raise InstallationError(f"Failed to download {url}: {exc}") from exc
@@ -299,9 +305,14 @@ class TaskInstaller:
         if not extensions_file.exists():
             LOGGER.warning("Extensions configuration not found at %s", extensions_file)
             return
-        recommendations = json.loads(extensions_file.read_text(encoding="utf-8")).get(
-            "recommendations", []
+        # VS Code allows line comments in extensions.json; keep // inside strings.
+        raw_config = extensions_file.read_text(encoding="utf-8")
+        without_comments = re.sub(
+            r'"(?:\\.|[^"\\])*"|//[^\r\n]*',
+            lambda match: match.group(0) if match.group(0).startswith('"') else "",
+            raw_config,
         )
+        recommendations = json.loads(without_comments).get("recommendations", [])
         for extension in recommendations:
             if not extension:
                 continue

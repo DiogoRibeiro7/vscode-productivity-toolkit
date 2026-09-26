@@ -33,6 +33,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$script:ToolkitRoot = (Resolve-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath '..')).Path
 
 function Write-Log {
     param(
@@ -82,9 +83,7 @@ function Resolve-CodeBinary {
 }
 
 function Get-CategoryMap {
-    $scriptDirectory = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
-    $defaultRoot = (Resolve-Path -Path (Join-Path -Path $scriptDirectory -ChildPath '..')).Path
-    $resolvedRoot = if ($SourceRoot) { (Resolve-Path -Path $SourceRoot).Path } else { $defaultRoot }
+    $resolvedRoot = if ($SourceRoot) { (Resolve-Path -Path $SourceRoot).Path } else { $script:ToolkitRoot }
 
     return @(
         [pscustomobject]@{ Key = 'python-general'; Label = 'Python – General'; Description = 'Quality, packaging, docker, and git automation.'; Path = 'tasks/python/general.json'; Root = $resolvedRoot },
@@ -335,7 +334,10 @@ function Install-Extensions {
         return
     }
 
-    $extensions = (Get-Content -Path $ExtensionsFile | ConvertFrom-Json).recommendations
+    $jsonc = (Get-Content -Path $ExtensionsFile) |
+        ForEach-Object { $_ -replace '//.*$', '' } |
+        Out-String
+    $extensions = ($jsonc | ConvertFrom-Json).recommendations
     foreach ($extension in $extensions) {
         if (-not $extension) { continue }
         try {
@@ -345,7 +347,7 @@ function Install-Extensions {
             Write-Log -Level 'INFO' -Message "Ensured extension $extension is installed."
         }
         catch {
-            Write-Log -Level 'WARN' -Message "Failed to install extension $extension: $($_.Exception.Message)"
+            Write-Log -Level 'WARN' -Message "Failed to install extension ${extension}: $($_.Exception.Message)"
         }
     }
 }
@@ -361,7 +363,16 @@ try {
         throw 'No categories selected; installation aborted.'
     }
 
-    $vscodeDir = Join-Path -Path $env:USERPROFILE -ChildPath '.vscode'
+    $userHome = if ($env:USERPROFILE) {
+        $env:USERPROFILE
+    }
+    elseif ($HOME) {
+        $HOME
+    }
+    else {
+        [Environment]::GetFolderPath('UserProfile')
+    }
+    $vscodeDir = Join-Path -Path $userHome -ChildPath '.vscode'
     if (-not (Test-Path -Path $vscodeDir)) {
         Write-Log -Level 'INFO' -Message "Creating $vscodeDir directory."
         if (-not $DryRun) { New-Item -ItemType Directory -Path $vscodeDir | Out-Null }
@@ -396,7 +407,7 @@ try {
     }
     Write-Log -Level 'INFO' -Message "tasks.json updated with selected categories."
 
-    $settingsDir = Join-Path -Path (Resolve-Path -Path (Join-Path -Path (Split-Path -Path $MyInvocation.MyCommand.Path -Parent) -ChildPath '..')) -ChildPath 'settings'
+    $settingsDir = Join-Path -Path $script:ToolkitRoot -ChildPath 'settings'
     foreach ($fileName in @('settings.json','keybindings.json','extensions.json')) {
         $sourceFile = Join-Path -Path $settingsDir -ChildPath $fileName
         if (-not (Test-Path -Path $sourceFile)) { continue }

@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit#readme",
   "engines": {
-    "vscode": "^1.74.0"
+    "vscode": "^1.110.0"
   },
   "categories": [
     "Other",
@@ -40,7 +40,9 @@
     "git"
   ],
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "workspaceContains:package.json",
+    "workspaceContains:requirements.txt"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -189,8 +191,8 @@
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "lint": "eslint src services providers webviews --ext ts",
+    "test": "node ./out/src/test/runTest.js"
   },
   "devDependencies": {
     "@types/vscode": "^1.110.0",
@@ -207,7 +209,6 @@
     "@vscode/test-electron": "^2.5.2"
   },
   "dependencies": {
-    "axios": "^1.13.6",
     "fs-extra": "^11.3.4"
   }
 }

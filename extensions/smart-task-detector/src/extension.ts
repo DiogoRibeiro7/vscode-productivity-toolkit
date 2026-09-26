@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
-import { ProjectDetector } from './services/ProjectDetector';
-import { TaskInstaller } from './services/TaskInstaller';
-import { TaskManager } from './services/TaskManager';
-import { WelcomeProvider } from './providers/WelcomeProvider';
-import { TasksTreeProvider } from './providers/TasksTreeProvider';
-import { ProjectTreeProvider } from './providers/ProjectTreeProvider';
-import { TaskManagerWebview } from './webviews/TaskManagerWebview';
+import { ProjectDetector } from '../services/ProjectDetector';
+import { TaskInstaller } from '../services/TaskInstaller';
+import { TaskManager } from '../services/TaskManager';
+import { WelcomeProvider } from '../providers/WelcomeProvider';
+import { TasksTreeProvider } from '../providers/TasksTreeProvider';
+import { ProjectTreeProvider } from '../providers/ProjectTreeProvider';
+import { TaskManagerWebview } from '../webviews/TaskManagerWebview';
 
 export function activate(context: vscode.ExtensionContext) {
     vscode.window.showInformationMessage('Smart Task Detector extension is now active!');
@@ -152,7 +152,6 @@ async function detectAndInstallTasks(
     }
 }
 
-export function deactivate() {
 export function deactivate() {
     vscode.window.showInformationMessage('Smart Task Detector extension is now deactivated.');
 }

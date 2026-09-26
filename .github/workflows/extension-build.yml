@@ -45,7 +45,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [18.x, 20.x]
+        node-version: [20.x, 22.x]
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -69,8 +69,9 @@ jobs:
         run: npm run lint
         working-directory: extensions/smart-task-detector
 
-      - name: Run unit tests
-        run: npm test
+      - name: Run extension host tests
+        if: runner.os == 'Linux'
+        run: xvfb-run -a npm test
         working-directory: extensions/smart-task-detector
 
   extension-build:
@@ -97,7 +98,7 @@ jobs:
         working-directory: extensions/smart-task-detector
 
       - name: Package extension
-        run: npx vsce package --no-dependencies
+        run: npx --yes @vscode/vsce package --no-dependencies
         working-directory: extensions/smart-task-detector
 
       - name: Upload extension artifact
@@ -212,7 +213,7 @@ jobs:
         working-directory: extensions/smart-task-detector
 
       - name: Validate extension manifest
-        run: npx vsce ls
+        run: npx --yes @vscode/vsce ls
         working-directory: extensions/smart-task-detector
 
   publish-ready:
@@ -257,7 +258,7 @@ jobs:
       - name: Publish to VS Code Marketplace
         env:
           VSCE_PAT: ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
-        run: npx vsce publish --no-dependencies
+        run: npx --yes @vscode/vsce publish --no-dependencies
         working-directory: extensions/smart-task-detector
 
       - name: Create GitHub Release

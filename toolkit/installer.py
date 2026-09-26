@@ -12,6 +12,7 @@ import json
 import logging
 import shutil
 import urllib.request
+from urllib.parse import urlparse
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
@@ -92,8 +93,12 @@ class TaskInstaller:
         """Download task definition for a specific category."""
         url = self._get_category_url(category)
         
+        parsed = urlparse(url)
+        if parsed.scheme != "https" or parsed.hostname != "raw.githubusercontent.com":
+            raise ValidationError("Task repository URL must use HTTPS on raw.githubusercontent.com")
+
         try:
-            with urllib.request.urlopen(url, timeout=30) as response:
+            with urllib.request.urlopen(url, timeout=30) as response:  # nosec B310 - URL validated above
                 if response.status != 200:
                     raise ValidationError(f"HTTP {response.status}: Failed to download {category}")
                 

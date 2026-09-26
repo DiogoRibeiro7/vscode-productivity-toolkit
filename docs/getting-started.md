@@ -7,7 +7,7 @@ Welcome to the VS Code Productivity Toolkit! This guide will help you get up and
 ### Option 1: VS Code Extension (Recommended)
 
 1. **Install the Extension**
-   ```
+   ```text
    ext install diogoribeiro7.smart-task-detector
    ```
 
@@ -247,7 +247,7 @@ Use background tasks for file watchers and dev servers:
 
 ### Getting Help
 
-- **Documentation**: Check the [full documentation](docs/)
+- **Documentation**: Check the [documentation index](README.md)
 - **Issues**: Report bugs on [GitHub Issues](https://github.com/DiogoRibeiro7/vscode-productivity-toolkit/issues)
 - **Discussions**: Join the conversation on [GitHub Discussions](https://github.com/DiogoRibeiro7/vscode-productivity-toolkit/discussions)
 

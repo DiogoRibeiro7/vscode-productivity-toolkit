@@ -48,7 +48,7 @@ nav:
       - Quality assurance: quality-assurance.md
       - Development: development.md
       - Contributing: contributing.md
-      - Documentation map: README.md
+      - Documentation map: documentation-map.md
 
 plugins:
   - search

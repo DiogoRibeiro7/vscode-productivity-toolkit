@@ -38,16 +38,7 @@ Examples:
   vscode-toolkit install --categories python-general,docker,git
   
   # Detect project type without installing
-  vscode-toolkit detect --workspace .
-  
-  # Export current configuration
-  vscode-toolkit export --output my-config.json
-  
-  # Import team configuration
-  vscode-toolkit import --config team-config.json
-  
-  # Validate custom tasks
-  vscode-toolkit validate --path ./custom-tasks/
+  vscode-toolkit --workspace . detect
         """,
     )
 
@@ -110,74 +101,6 @@ Examples:
         "--json",
         action="store_true",
         help="Output results in JSON format",
-    )
-
-    # Export command
-    export_parser = subparsers.add_parser(
-        "export",
-        help="Export current task configuration",
-    )
-    export_parser.add_argument(
-        "--output", "-o",
-        type=Path,
-        required=True,
-        help="Output file path for exported configuration",
-    )
-    export_parser.add_argument(
-        "--include-settings",
-        action="store_true",
-        help="Include VS Code settings in export",
-    )
-
-    # Import command
-    import_parser = subparsers.add_parser(
-        "import",
-        help="Import task configuration",
-    )
-    import_parser.add_argument(
-        "--config", "-c",
-        type=Path,
-        required=True,
-        help="Configuration file to import",
-    )
-    import_parser.add_argument(
-        "--merge",
-        action="store_true",
-        help="Merge with existing configuration",
-    )
-
-    # Validate command
-    validate_parser = subparsers.add_parser(
-        "validate",
-        help="Validate task definitions",
-    )
-    validate_parser.add_argument(
-        "--path", "-p",
-        type=Path,
-        help="Path to task definitions (default: current workspace)",
-    )
-
-    # List command
-    list_parser = subparsers.add_parser(
-        "list",
-        help="List available task categories",
-    )
-    list_parser.add_argument(
-        "--installed",
-        action="store_true",
-        help="Show only installed tasks",
-    )
-
-    # Clean command
-    clean_parser = subparsers.add_parser(
-        "clean",
-        help="Clean up task configurations",
-    )
-    clean_parser.add_argument(
-        "--backup-days",
-        type=int,
-        default=30,
-        help="Remove backups older than N days (default: 30)",
     )
 
     return parser

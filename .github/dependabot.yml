@@ -1,27 +1,6 @@
-# MIT License
-# Copyright (c) 2025 Diogo Ribeiro
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 version: 2
 updates:
-  # Python dependencies in root
+  # Python dependencies in the repository root.
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
@@ -42,46 +21,64 @@ updates:
       - dependency-type: "direct"
       - dependency-type: "indirect"
     ignore:
-      # Ignore patch updates for stable packages
-      - dependency-name: "pytest"
-        update-types: ["version-update:semver-patch"]
-      - dependency-name: "jsonschema"
-        update-types: ["version-update:semver-patch"]
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
 
-  # Smart Task Detector extension dependencies
+  # Root tooling and the Smart Task Detector extension.
   - package-ecosystem: "npm"
-    directory: "/extensions/smart-task-detector"
+    directories:
+      - "/"
+      - "/extensions/smart-task-detector"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     reviewers:
       - "DiogoRibeiro7"
     assignees:
       - "DiogoRibeiro7"
     commit-message:
-      prefix: "deps(extension)"
+      prefix: "deps"
       include: "scope"
     labels:
       - "dependencies"
       - "typescript"
-      - "vscode-extension"
     allow:
       - dependency-type: "direct"
       - dependency-type: "indirect"
     ignore:
-      # Ignore dev dependencies patch updates
-      - dependency-name: "@types/*"
-        update-types: ["version-update:semver-patch"]
-      - dependency-name: "typescript"
-        update-types: ["version-update:semver-patch"]
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
     versioning-strategy: "increase"
 
-  # GitHub Actions workflow dependencies
+  # Pre-commit hooks used by the repository.
+  - package-ecosystem: "pre-commit"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "DiogoRibeiro7"
+    assignees:
+      - "DiogoRibeiro7"
+    commit-message:
+      prefix: "deps(pre-commit)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "pre-commit"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+
+  # GitHub Actions workflow dependencies.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     reviewers:
       - "DiogoRibeiro7"
     assignees:
@@ -95,13 +92,17 @@ updates:
       - "ci"
     allow:
       - dependency-type: "direct"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
 
-  # Docker dependencies (if any Dockerfile dependencies exist)
+  # Docker dependencies, when Dockerfiles declare tracked base images.
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     reviewers:
       - "DiogoRibeiro7"
     assignees:
@@ -112,13 +113,17 @@ updates:
     labels:
       - "dependencies"
       - "docker"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
 
-  # Check for any additional npm dependencies in examples or other directories
+  # Maintained React example.
   - package-ecosystem: "npm"
     directory: "/examples/sample-projects/react-dashboard"
     schedule:
       interval: "monthly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     reviewers:
       - "DiogoRibeiro7"
     commit-message:
@@ -128,13 +133,17 @@ updates:
       - "dependencies"
       - "examples"
       - "react"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
 
-  # Monitor requirements.txt files in examples
+  # Maintained Python data-science example.
   - package-ecosystem: "pip"
     directory: "/examples/sample-projects/python-data-science"
     schedule:
       interval: "monthly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     reviewers:
       - "DiogoRibeiro7"
     commit-message:
@@ -145,3 +154,7 @@ updates:
       - "examples"
       - "python"
       - "data-science"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"

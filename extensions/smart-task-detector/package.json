@@ -40,7 +40,9 @@
     "git"
   ],
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "workspaceContains:package.json",
+    "workspaceContains:requirements.txt"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -207,7 +209,6 @@
     "@vscode/test-electron": "^2.5.2"
   },
   "dependencies": {
-    "axios": "^1.13.6",
     "fs-extra": "^11.3.4"
   }
 }

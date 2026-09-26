@@ -179,7 +179,7 @@ python scripts/bulk-install.py --pattern "projects/*" --types python,docker
 
 After installation, your project will have:
 
-```
+```text
 your-project/
 ├── .vscode/
 │   ├── tasks.json          # VS Code tasks configuration

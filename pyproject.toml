@@ -98,7 +98,7 @@ vscode-toolkit = "toolkit.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit"
-Documentation = "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit/tree/main/docs"
+Documentation = "https://diogoribeiro7.github.io/vscode-productivity-toolkit/"
 Repository = "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit.git"
 Issues = "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit/issues"
 Changelog = "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit/blob/main/CHANGELOG.md"

@@ -57,3 +57,6 @@ pytest.cache/
 # IDE
 .idea/
 *.iml
+
+# MkDocs output
+site/

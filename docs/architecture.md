@@ -1,61 +1,28 @@
-<!--
-MIT License
-Copyright (c) 2025 Diogo Ribeiro
+# Architecture
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
--->
-
-# Architecture Overview
-
-## High-Level Components
+The repository has three ways to select task definitions. The Python CLI detects a workspace and downloads selected JSON files. Local installer scripts read the files in the checkout. The VS Code extension provides detection and a task manager inside the editor.
 
 ```mermaid
-graph TD
-    A[CLI (Python)] --> B[Workspace Auditing Tasks]
-    A --> C[Configuration Exporter]
-    A --> D[Extension Manager]
-    B --> E[Reports & Recommendations]
-    C --> F[VS Code Config Templates]
-    D --> G[VS Code CLI]
-    H[Install Scripts] --> A
-    H --> F
+flowchart TD
+    A["Workspace"] --> B["Python CLI"]
+    A --> C["VS Code extension"]
+    D["Local checkout"] --> E["Install scripts"]
+    B --> F["Task definitions"]
+    C --> F
+    E --> F
+    F --> G["VS Code tasks.json"]
 ```
 
-### CLI Layer
+## Task definitions
 
-The CLI orchestrates toolkit capabilities through modular commands. It validates user input, delegates to task modules, and emits structured logs for observability.
+The files under [`tasks/`](https://github.com/DiogoRibeiro7/vscode-productivity-toolkit/tree/main/tasks) contain VS Code tasks, inputs, and problem matchers. A task may invoke an external executable such as Python, npm, or Docker; the toolkit supplies task configuration, not those executables.
 
-### Task Modules
+## Python CLI
 
-Task modules encapsulate business logic such as workspace audits. They expose predictable interfaces so new tasks can be integrated without modifying the CLI core.
+`toolkit.detector.ProjectDetector` collects workspace evidence and suggests categories. `toolkit.installer.TaskInstaller` downloads selected definitions, merges task labels and inputs, backs up an existing `tasks.json`, and writes the workspace configuration.
 
-### Configuration Templates
+## Extension and scripts
 
-Configuration files in the `settings` directory store curated VS Code settings. The CLI can export these templates or merge them with existing user preferences while respecting accessibility requirements.
+The [extension](https://github.com/DiogoRibeiro7/vscode-productivity-toolkit/tree/main/extensions/smart-task-detector) has its own project detector and task management service. The [install scripts](https://github.com/DiogoRibeiro7/vscode-productivity-toolkit/tree/main/scripts) provide local installation routes. Their configuration behavior is documented in [Getting started](getting-started.md).
 
-### Install Scripts
-
-Shell and PowerShell scripts bootstrap the toolkit, install dependencies, and configure environment variables. They rely on defensive programming practices to guarantee safe rollbacks when failures occur.
-
-## Cross-Cutting Concerns
-
-- **Logging**: Structured logging is managed via the `toolkit.logging` module. Logs default to JSON for easy ingestion by observability stacks.
-- **Security**: Input validation, path normalization, and sanitized subprocess invocations defend against command injection and insecure defaults.
-- **Testing**: The `tests` directory houses unit tests, while GitHub Actions runs the test suite on every commit.
-- **Documentation**: All features include up-to-date documentation to support both new and experienced contributors.
+The routes share task definitions but have separate implementations. Tests should cover interoperability when a workspace is modified by more than one route.

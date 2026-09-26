@@ -1,45 +1,25 @@
-<!--
-MIT License
-Copyright (c) 2025 Diogo Ribeiro
+# Frequently asked questions
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+## Where are tasks installed?
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+The Python CLI writes to the selected workspace's `.vscode/tasks.json`. The Bash and PowerShell scripts install under the user's home VS Code configuration. See [Getting started](getting-started.md) for the commands.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
--->
+## Which VS Code version does the extension require?
 
-# Frequently Asked Questions
+The extension manifest declares `^1.110.0`. The JSON task definitions themselves are VS Code configuration and can be inspected independently of the extension.
 
-## What operating systems are supported?
-The toolkit supports Windows 10+, macOS 11+, and Ubuntu 20.04+ through dedicated installation scripts and cross-platform Python modules.
+## Does the toolkit install Python, Docker, or npm?
 
-## Which versions of VS Code are compatible?
-The toolkit targets VS Code 1.70.0 and above. New releases maintain backward compatibility wherever feasible.
+No. Task definitions call tools already installed in your development environment.
 
-## Do I need administrative privileges to install the toolkit?
-Administrative privileges are not required for most operations. However, installing certain extensions or writing to system-level directories may require elevation. The installers detect and report these cases.
+## Can I choose collections without detection?
 
-## How is logging configured?
-Logging defaults to JSON-formatted output at the INFO level. Users can switch to DEBUG mode via the `--log-level` CLI flag to include stack traces for troubleshooting.
+Yes. Use `vscode-toolkit --workspace /path/to/project install --categories python-general,git`. See the [task catalog](task-reference.md).
 
-## How does the Smart Task Detector decide which tasks to install?
-The extension scans the workspace for indicators such as `pyproject.toml`, `requirements.txt`, `package.json`, or Jupyter notebooks. It then surfaces matching task collections (Python data science, Python general, React, Node) in the status bar and quick pick UI. Installation merges the selected JSON definitions into `.vscode/tasks.json`, creating backups and syncing recommended extensions automatically.
+## Can I review changes before installing?
 
-## Can I customize the recommended configuration?
-Yes. Export the configuration templates using `python -m toolkit.cli configure --output ./path` and modify the generated files. The CLI validates JSON structure to prevent malformed settings.
+The Bash and PowerShell scripts have dry-run options. The Python CLI backs up an existing `tasks.json` by default, but does not currently provide a dry-run command. Use version control for the workspace configuration and inspect the generated file.
 
-## How do I contribute a new feature?
-Review `docs/contributing.md` for branching strategy, commit conventions, and testing requirements. Submit a pull request referencing the relevant issue or discussion thread.
+## How do I report a problem?
+
+Open a [GitHub issue](https://github.com/DiogoRibeiro7/vscode-productivity-toolkit/issues) with the command, operating system, version, and relevant error output. Remove credentials and personal paths from logs first.

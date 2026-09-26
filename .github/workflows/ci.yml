@@ -137,6 +137,9 @@ jobs:
       - name: Validate documentation
         run: python -m pytest tests/test_documentation_quality.py -vv
 
+      - name: Build documentation site
+        run: mkdocs build --strict
+
   release-readiness:
     name: Release Readiness
     needs:

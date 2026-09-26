@@ -1,61 +1,37 @@
-<!--
-MIT License
-Copyright (c) 2025 Diogo Ribeiro
+# Development
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+## Local setup
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
--->
-
-# Development Guide
-
-This document explains how to work with the toolkit source code, run tests, and validate documentation updates.
-
-## Local Environment Setup
-
-1. Create a Python virtual environment with `python -m venv .venv`.
-2. Activate the environment and install dependencies via `pip install -r requirements.txt`.
-3. Install optional tooling such as `jq` (for shell installers) and the VS Code `code` CLI.
-
-## Running Tests
+Clone the repository, create a virtual environment, and install the development and documentation extras:
 
 ```bash
-pytest --maxfail=1 --disable-warnings -vv
-npm install --prefix extensions/smart-task-detector
-npm run compile --prefix extensions/smart-task-detector
+python -m venv .venv
+python -m pip install -e ".[dev,docs]"
 ```
 
-All new features require unit tests. Integration tests should be added when functionality spans multiple modules (e.g., CLI + task module).
+Activate `.venv` before running the commands below. The Python package uses setuptools as configured in `pyproject.toml`.
 
-## Formatting & Linting
+## Verify changes
 
-- Follow PEP 8 and use descriptive camelCase function names in Python modules.
-- Prefer `ruff` or `flake8` for linting; include commands and configuration in follow-up contributions.
-- PowerShell scripts must pass `PSScriptAnalyzer` validation with the default rule set.
+```bash
+python -m pytest -vv
+mkdocs build --strict
+npm ci --prefix extensions/smart-task-detector
+npm run compile --prefix extensions/smart-task-detector
+npm run lint --prefix extensions/smart-task-detector
+```
 
-## Directory Overview
+The extension tests require a VS Code extension host; CI runs them on Linux under `xvfb`. For installer changes, run the corresponding integration tests on your platform and let the CI matrix cover the others.
 
-| Path | Description |
+## Repository layout
+
+| Path | Purpose |
 | --- | --- |
-| `toolkit/` | Python package exposing the CLI entry point and logging utilities. |
-| `tasks/` | Modular automation organised by ecosystem. Python tasks can be imported directly into the CLI. |
-| `extensions/` | VS Code extensions, including the Smart Task Detector TypeScript project. Run `npm run compile` before committing. |
-| `scripts/` | Installation and environment bootstrap scripts for Bash, PowerShell, and Python. |
-| `settings/` | VS Code configuration templates exported by the CLI. |
-| `snippets/` | Shared snippet packs that accelerate common tasks. |
+| `toolkit/` | Python CLI, detection, and task installation |
+| `tasks/` | Source VS Code task definitions |
+| `extensions/smart-task-detector/` | TypeScript extension |
+| `scripts/` | Bash, PowerShell, and Python installers |
+| `tests/` | Python tests |
+| `docs/` | This MkDocs site |
 
-Review each directory README for detailed contribution notes before submitting pull requests.
+Update examples and task descriptions when behavior changes. Use [Contributing](contributing.md) for pull request guidance.

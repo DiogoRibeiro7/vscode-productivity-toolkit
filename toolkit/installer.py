@@ -15,7 +15,7 @@ import urllib.request
 from urllib.parse import urlparse
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from .utils import TaskCategory, ValidationError
 
@@ -128,6 +128,33 @@ class TaskInstaller:
         
         return f"{self.repository_url}/{path}"
 
+    @staticmethod
+    def _prepare_metadata(
+        raw_metadata: Any,
+    ) -> Tuple[Union[Dict[str, Any], List[Any]], Dict[str, Any]]:
+        """Preserve metadata from each installer and locate the CLI's tracking entry."""
+        tracker: Dict[str, Any] = {
+            "installedCategories": [],
+            "lastUpdated": None,
+            "version": "1.0.0",
+        }
+
+        if isinstance(raw_metadata, list):
+            for entry in raw_metadata:
+                if isinstance(entry, dict) and isinstance(
+                    entry.get("installedCategories"), list
+                ):
+                    return raw_metadata, entry
+            raw_metadata.append(tracker)
+            return raw_metadata, tracker
+
+        if isinstance(raw_metadata, dict):
+            if not isinstance(raw_metadata.get("installedCategories"), list):
+                raw_metadata["installedCategories"] = []
+            return raw_metadata, raw_metadata
+
+        return tracker, tracker
+
     def _merge_task_definitions(
         self, 
         task_definitions: List[tuple[str, Dict[str, Any]]]
@@ -144,17 +171,16 @@ class TaskInstaller:
                 logger.warning(f"Could not read existing tasks.json: {e}")
                 existing_tasks = {}
 
-        # Initialize merged structure
+        # Shell installers store source metadata as a list; preserve that format.
+        metadata, tracker = self._prepare_metadata(
+            existing_tasks.get("_toolkitMetadata")
+        )
         merged = {
             "version": "2.0.0",
             "tasks": existing_tasks.get("tasks", []),
             "inputs": existing_tasks.get("inputs", []),
             "problemMatchers": existing_tasks.get("problemMatchers", []),
-            "_toolkitMetadata": existing_tasks.get("_toolkitMetadata", {
-                "installedCategories": [],
-                "lastUpdated": None,
-                "version": "1.0.0"
-            })
+            "_toolkitMetadata": metadata,
         }
 
         # Track existing task labels to avoid duplicates
@@ -193,11 +219,11 @@ class TaskInstaller:
                     existing_matcher_names.add(pm_name)
 
             # Update metadata
-            if category not in merged["_toolkitMetadata"]["installedCategories"]:
-                merged["_toolkitMetadata"]["installedCategories"].append(category)
+            if category not in tracker["installedCategories"]:
+                tracker["installedCategories"].append(category)
 
         # Update metadata
-        merged["_toolkitMetadata"]["lastUpdated"] = datetime.now().isoformat()
+        tracker["lastUpdated"] = datetime.now().isoformat()
         
         return merged
 

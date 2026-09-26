@@ -17,6 +17,7 @@ from typing import List, Dict, Any
 import argparse
 import urllib.request
 import urllib.error
+from urllib.parse import urlparse
 
 class ProjectDetector:
     """Detects project types based on file patterns and dependencies."""
@@ -237,8 +238,13 @@ class TaskInstaller:
         
         url = f"{base_url.rstrip('/')}/{task_file}"
         
+        parsed = urlparse(url)
+        if parsed.scheme != "https" or not parsed.hostname:
+            print(f"Refusing non-HTTPS task repository URL: {url}")
+            return []
+
         try:
-            with urllib.request.urlopen(url) as response:
+            with urllib.request.urlopen(url, timeout=30) as response:  # nosec B310 - HTTPS URL validated above
                 task_data = json.loads(response.read().decode())
                 return task_data.get('tasks', [])
         except urllib.error.URLError as e:

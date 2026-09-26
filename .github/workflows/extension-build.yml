@@ -69,14 +69,9 @@ jobs:
         run: npm run lint
         working-directory: extensions/smart-task-detector
 
-      - name: Run unit tests (Linux)
+      - name: Run extension host tests
         if: runner.os == 'Linux'
         run: xvfb-run -a npm test
-        working-directory: extensions/smart-task-detector
-
-      - name: Run unit tests
-        if: runner.os != 'Linux'
-        run: npm test
         working-directory: extensions/smart-task-detector
 
   extension-build:

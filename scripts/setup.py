@@ -27,6 +27,7 @@ import argparse
 import json
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -304,9 +305,14 @@ class TaskInstaller:
         if not extensions_file.exists():
             LOGGER.warning("Extensions configuration not found at %s", extensions_file)
             return
-        recommendations = json.loads(extensions_file.read_text(encoding="utf-8")).get(
-            "recommendations", []
+        # VS Code allows line comments in extensions.json; keep // inside strings.
+        raw_config = extensions_file.read_text(encoding="utf-8")
+        without_comments = re.sub(
+            r'"(?:\\.|[^"\\])*"|//[^\\r\\n]*',
+            lambda match: match.group(0) if match.group(0).startswith('"') else "",
+            raw_config,
         )
+        recommendations = json.loads(without_comments).get("recommendations", [])
         for extension in recommendations:
             if not extension:
                 continue

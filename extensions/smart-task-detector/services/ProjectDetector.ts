@@ -10,6 +10,8 @@ export interface DetectedProject {
 }
 
 export class ProjectDetector {
+    constructor(private readonly projectRoot?: string) {}
+
     private readonly detectionRules: DetectionRule[] = [
         // Python projects
         {
@@ -64,15 +66,17 @@ export class ProjectDetector {
     ];
 
     async detectProjectTypes(): Promise<DetectedProject[]> {
-        const workspaceFolders = vscode.workspace.workspaceFolders;
-        if (!workspaceFolders) {
+        const roots = this.projectRoot
+            ? [this.projectRoot]
+            : (vscode.workspace.workspaceFolders ?? []).map(folder => folder.uri.fsPath);
+
+        if (roots.length === 0) {
             return [];
         }
 
         const detectedProjects: DetectedProject[] = [];
 
-        for (const folder of workspaceFolders) {
-            const folderPath = folder.uri.fsPath;
+        for (const folderPath of roots) {
             const projectDetections = await this.analyzeFolder(folderPath);
             detectedProjects.push(...projectDetections);
         }

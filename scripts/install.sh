@@ -460,7 +460,11 @@ main() {
   local vscode_dir
   vscode_dir="$(ensure_vscode_dir)"
 
-  mapfile -t selected < <(select_categories)
+  local -a selected=()
+  local entry
+  while IFS= read -r entry; do
+    selected+=("${entry}")
+  done < <(select_categories)
   if [[ ${#selected[@]} -eq 0 ]]; then
     log "ERROR" "No categories selected; installation aborted."
     exit 1

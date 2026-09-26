@@ -38,5 +38,5 @@ livereload>=2.6.0,<3.0.0     # Live reload for development
 
 # Compatibility and utility packages
 importlib-metadata>=4.0.0; python_version < "3.10"  # Backport for older Python
-tomli>=2.0.0; python_version < "3.11"  # TOML parsing for older Python
+tomli>=2.4.1; python_version < "3.11"  # TOML parsing for older Python
 typing-extensions>=4.0.0     # Extended typing support

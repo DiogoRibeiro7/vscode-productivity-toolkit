@@ -308,7 +308,7 @@ class TaskInstaller:
         # VS Code allows line comments in extensions.json; keep // inside strings.
         raw_config = extensions_file.read_text(encoding="utf-8")
         without_comments = re.sub(
-            r'"(?:\\.|[^"\\])*"|//[^\\r\\n]*',
+            r'"(?:\\.|[^"\\])*"|//[^\r\n]*',
             lambda match: match.group(0) if match.group(0).startswith('"') else "",
             raw_config,
         )

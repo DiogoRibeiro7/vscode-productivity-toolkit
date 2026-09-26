@@ -102,7 +102,6 @@ Documentation = "https://diogoribeiro7.github.io/vscode-productivity-toolkit/"
 Repository = "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit.git"
 Issues = "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit/issues"
 Changelog = "https://github.com/DiogoRibeiro7/vscode-productivity-toolkit/blob/main/CHANGELOG.md"
-Funding = "mailto:dfr@esmad.ipp.pt"
 
 [tool.setuptools]
 packages = ["toolkit"]

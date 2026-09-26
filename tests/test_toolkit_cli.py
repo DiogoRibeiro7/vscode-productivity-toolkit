@@ -30,7 +30,6 @@ def test_create_parser_supports_detect_json(tmp_path: Path) -> None:
     assert args.json is True
 
 
-
 def test_help_only_advertises_implemented_commands() -> None:
     help_text = cli.create_parser().format_help()
 

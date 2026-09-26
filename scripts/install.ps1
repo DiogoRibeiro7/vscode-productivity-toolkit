@@ -361,7 +361,16 @@ try {
         throw 'No categories selected; installation aborted.'
     }
 
-    $vscodeDir = Join-Path -Path $env:USERPROFILE -ChildPath '.vscode'
+    $userHome = if ($env:USERPROFILE) {
+        $env:USERPROFILE
+    }
+    elseif ($HOME) {
+        $HOME
+    }
+    else {
+        [Environment]::GetFolderPath('UserProfile')
+    }
+    $vscodeDir = Join-Path -Path $userHome -ChildPath '.vscode'
     if (-not (Test-Path -Path $vscodeDir)) {
         Write-Log -Level 'INFO' -Message "Creating $vscodeDir directory."
         if (-not $DryRun) { New-Item -ItemType Directory -Path $vscodeDir | Out-Null }

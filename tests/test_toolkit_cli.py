@@ -30,6 +30,15 @@ def test_create_parser_supports_detect_json(tmp_path: Path) -> None:
     assert args.json is True
 
 
+
+def test_help_only_advertises_implemented_commands() -> None:
+    help_text = cli.create_parser().format_help()
+
+    assert "{install,detect}" in help_text
+    assert "vscode-toolkit --workspace . detect" in help_text
+    assert "vscode-toolkit export" not in help_text
+
+
 def test_cmd_detect_emits_json(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

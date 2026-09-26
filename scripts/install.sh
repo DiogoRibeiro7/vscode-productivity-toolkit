@@ -43,7 +43,7 @@ log() {
     return
   fi
   local payload
-  payload=$(printf '{"timestamp":"%s","level":"%s","message":"%s"}' "${timestamp}" "${level}" "${message//"/\"}")
+  payload=$(printf '{"timestamp":"%s","level":"%s","message":"%s"}' "${timestamp}" "${level}" "${message//\"/\\\"}")
   if [[ "${level}" == "ERROR" ]]; then
     >&2 echo "${payload}"
   else

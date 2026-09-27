@@ -17,7 +17,7 @@ Detection reads workspace indicators such as `pyproject.toml`, `package.json`, `
 vscode-toolkit --workspace /path/to/project install --auto-detect
 ```
 
-The CLI merges suggested tasks into `.vscode/tasks.json`. An existing configuration is backed up by default. The CLI downloads category definitions from the repository over HTTPS during installation.
+The CLI merges suggested tasks into `.vscode/tasks.json`. An existing configuration is backed up by default. The Python CLI requires standard JSON in an existing `tasks.json`; if it cannot parse the file, installation stops without replacing it. The CLI downloads category definitions from the repository over HTTPS during installation.
 
 ## Select categories explicitly
 

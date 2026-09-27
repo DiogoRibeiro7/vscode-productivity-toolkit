@@ -83,7 +83,7 @@ Examples:
     install_parser.add_argument(
         "--force",
         action="store_true",
-        help="Force installation even if tasks.json exists",
+        help="Replace existing tasks.json instead of merging",
     )
     install_parser.add_argument(
         "--backup",

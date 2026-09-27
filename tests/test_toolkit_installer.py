@@ -63,11 +63,13 @@ def test_cli_install_preserves_shell_installer_metadata(
         ("[]", "must be a JSON object"),
     ],
 )
+@pytest.mark.parametrize("force", [False, True])
 def test_install_preserves_invalid_existing_tasks(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     existing_content: str,
     error: str,
+    force: bool,
 ) -> None:
     vscode_dir = tmp_path / ".vscode"
     vscode_dir.mkdir()
@@ -82,7 +84,9 @@ def test_install_preserves_invalid_existing_tasks(
     )
 
     with pytest.raises(ValidationError, match=error):
-        installer.install_task_categories(["python-general"], create_backup=False)
+        installer.install_task_categories(
+            ["python-general"], force=force, create_backup=False
+        )
 
     assert tasks_path.read_text(encoding="utf-8") == existing_content
 
@@ -108,3 +112,59 @@ def test_failed_write_preserves_existing_tasks(
 
     assert tasks_path.read_text(encoding="utf-8") == original
     assert {path.name for path in vscode_dir.iterdir()} == {"tasks.json"}
+
+
+def test_force_replaces_existing_tasks_and_keeps_backup(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    vscode_dir = tmp_path / ".vscode"
+    vscode_dir.mkdir()
+    tasks_path = vscode_dir / "tasks.json"
+    original = {
+        "version": "2.0.0",
+        "tasks": [{"label": "existing", "command": "echo old"}],
+        "inputs": [{"id": "old-input"}],
+        "problemMatchers": [{"name": "old-matcher"}],
+        "_toolkitMetadata": [{"description": "existing source"}],
+    }
+    tasks_path.write_text(json.dumps(original), encoding="utf-8")
+    installer = TaskInstaller(tmp_path)
+
+    monkeypatch.setattr(
+        installer,
+        "_download_task_category",
+        lambda category: {
+            "tasks": [{"label": "new", "command": "echo new"}],
+            "inputs": [{"id": "new-input"}],
+            "problemMatchers": [{"name": "new-matcher"}],
+        },
+    )
+
+    installer.install_task_categories(["python-general"], force=True)
+
+    result = json.loads(tasks_path.read_text(encoding="utf-8"))
+    assert [task["label"] for task in result["tasks"]] == ["new"]
+    assert [item["id"] for item in result["inputs"]] == ["new-input"]
+    assert [item["name"] for item in result["problemMatchers"]] == ["new-matcher"]
+    assert result["_toolkitMetadata"]["installedCategories"] == ["python-general"]
+
+    backups = list((vscode_dir / "backups").glob("tasks_backup_*.json"))
+    assert len(backups) == 1
+    assert json.loads(backups[0].read_text(encoding="utf-8")) == original
+
+
+def test_force_aborts_when_backup_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    vscode_dir = tmp_path / ".vscode"
+    vscode_dir.mkdir()
+    tasks_path = vscode_dir / "tasks.json"
+    original = '{"version": "2.0.0", "tasks": []}'
+    tasks_path.write_text(original, encoding="utf-8")
+    installer = TaskInstaller(tmp_path)
+    monkeypatch.setattr(installer, "_create_backup", lambda: None)
+
+    with pytest.raises(ValidationError, match="Could not back up existing"):
+        installer.install_task_categories(["python-general"], force=True)
+
+    assert tasks_path.read_text(encoding="utf-8") == original

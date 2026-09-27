@@ -66,13 +66,14 @@ class TaskInstaller:
             if not TaskCategory.is_valid(category):
                 raise ValidationError(f"Invalid task category: {category}")
 
-        # Check if tasks.json exists and handle accordingly
-        if self.tasks_file.exists() and not force:
-            if create_backup:
-                self._create_backup()
-            logger.info("Merging with existing tasks.json")
-        elif create_backup and self.tasks_file.exists():
-            self._create_backup()
+        # Preserve the original before merging or explicitly replacing it.
+        if self.tasks_file.exists():
+            if create_backup and self._create_backup() is None:
+                raise ValidationError("Could not back up existing tasks.json")
+            logger.info(
+                "Replacing existing tasks.json" if force
+                else "Merging with existing tasks.json"
+            )
 
         # Download and merge task definitions
         task_definitions = []
@@ -86,7 +87,7 @@ class TaskInstaller:
                 raise
 
         # Merge and write tasks
-        merged_tasks = self._merge_task_definitions(task_definitions)
+        merged_tasks = self._merge_task_definitions(task_definitions, replace_existing=force)
         self._write_tasks_file(merged_tasks)
 
         logger.info(f"✅ Successfully installed {len(categories)} task categories")
@@ -159,9 +160,10 @@ class TaskInstaller:
 
     def _merge_task_definitions(
         self, 
-        task_definitions: List[tuple[str, Dict[str, Any]]]
+        task_definitions: List[tuple[str, Dict[str, Any]]],
+        replace_existing: bool = False,
     ) -> Dict[str, Any]:
-        """Merge multiple task definitions into a single tasks.json structure."""
+        """Merge task definitions, optionally replacing the existing task set."""
         
         # Load existing tasks if they exist
         existing_tasks = {}
@@ -177,6 +179,9 @@ class TaskInstaller:
                 raise ValidationError(
                     f"Existing tasks.json at {self.tasks_file} must be a JSON object"
                 )
+
+        if replace_existing:
+            existing_tasks = {}
 
         # Shell installers store source metadata as a list; preserve that format.
         metadata, tracker = self._prepare_metadata(

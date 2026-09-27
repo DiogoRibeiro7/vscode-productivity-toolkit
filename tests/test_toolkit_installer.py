@@ -55,6 +55,7 @@ def test_cli_install_preserves_shell_installer_metadata(
     assert metadata[1]["installedCategories"] == ["python-general"]
     assert metadata[1]["lastUpdated"]
 
+
 @pytest.mark.parametrize(
     ("existing_content", "error"),
     [
@@ -84,3 +85,26 @@ def test_install_preserves_invalid_existing_tasks(
         installer.install_task_categories(["python-general"], create_backup=False)
 
     assert tasks_path.read_text(encoding="utf-8") == existing_content
+
+
+def test_failed_write_preserves_existing_tasks(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    vscode_dir = tmp_path / ".vscode"
+    vscode_dir.mkdir()
+    tasks_path = vscode_dir / "tasks.json"
+    original = '{"version": "2.0.0", "tasks": [{"label": "existing"}]}'
+    tasks_path.write_text(original, encoding="utf-8")
+    installer = TaskInstaller(tmp_path)
+
+    def fail_after_partial_write(_tasks: Any, stream: Any, **_options: Any) -> None:
+        stream.write('{"tasks": [')
+        raise OSError("simulated write failure")
+
+    monkeypatch.setattr("toolkit.installer.json.dump", fail_after_partial_write)
+
+    with pytest.raises(ValidationError, match="Failed to write tasks.json"):
+        installer._write_tasks_file({"version": "2.0.0", "tasks": []})
+
+    assert tasks_path.read_text(encoding="utf-8") == original
+    assert {path.name for path in vscode_dir.iterdir()} == {"tasks.json"}

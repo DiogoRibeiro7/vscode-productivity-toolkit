@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import shutil
+import tempfile
 import urllib.request
 from urllib.parse import urlparse
 from datetime import datetime, timedelta
@@ -233,13 +235,33 @@ class TaskInstaller:
         return merged
 
     def _write_tasks_file(self, tasks: Dict[str, Any]) -> None:
-        """Write the tasks configuration to tasks.json."""
+        """Replace tasks.json only after the complete configuration is written."""
+        destination = self.tasks_file.resolve()
+        temporary_path: Optional[Path] = None
         try:
-            with open(self.tasks_file, 'w', encoding='utf-8') as f:
-                json.dump(tasks, f, indent=2, ensure_ascii=False)
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                dir=destination.parent,
+                prefix=".tasks-",
+                suffix=".json",
+                delete=False,
+            ) as temporary_file:
+                temporary_path = Path(temporary_file.name)
+                json.dump(tasks, temporary_file, indent=2, ensure_ascii=False)
+
+            if destination.exists():
+                shutil.copymode(destination, temporary_path)
+            os.replace(temporary_path, destination)
             logger.debug(f"Written tasks.json with {len(tasks.get('tasks', []))} tasks")
-        except OSError as e:
-            raise ValidationError(f"Failed to write tasks.json: {e}")
+        except (OSError, TypeError, ValueError) as e:
+            raise ValidationError(f"Failed to write tasks.json: {e}") from e
+        finally:
+            if temporary_path is not None:
+                try:
+                    temporary_path.unlink(missing_ok=True)
+                except OSError as e:
+                    logger.warning(f"Could not remove temporary tasks file: {e}")
 
     def _create_backup(self) -> Path:
         """Create a backup of the current tasks.json file."""

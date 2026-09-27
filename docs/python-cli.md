@@ -27,6 +27,16 @@ vscode-toolkit --workspace /path/to/project install --categories python-general,
 
 Choose from `python-general`, `python-data-science`, `javascript-general`, `javascript-node`, `javascript-react`, `docker`, and `git`. The [task catalog](task-reference.md) links to each definition.
 
+## Replace the current task set
+
+Use `--force` with explicit categories to replace the existing tasks, inputs, and problem matchers rather than merge them:
+
+```bash
+vscode-toolkit --workspace /path/to/project install --categories python-general,git --force
+```
+
+The CLI backs up the current `.vscode/tasks.json` before replacing it and stops if the requested backup cannot be made. An existing file must still be readable as standard JSON.
+
 The global `--workspace` option belongs before the subcommand. Use `--verbose` before the subcommand when diagnosing an error:
 
 ```bash

@@ -1,6 +1,6 @@
 # Python CLI
 
-The `vscode-toolkit` command currently implements `detect` and `install`. Run `vscode-toolkit --help` for the current argument list. Other command names displayed by the parser are reserved and do not yet have handlers.
+The `vscode-toolkit` command supports `detect` and `install`. Run `vscode-toolkit --help` for the current argument list.
 
 ## Detect project types
 

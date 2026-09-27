@@ -87,7 +87,9 @@ class TaskInstaller:
                 raise
 
         # Merge and write tasks
-        merged_tasks = self._merge_task_definitions(task_definitions, replace_existing=force)
+        merged_tasks = self._merge_task_definitions(
+            task_definitions, replace_existing=force
+        )
         self._write_tasks_file(merged_tasks)
 
         logger.info(f"✅ Successfully installed {len(categories)} task categories")

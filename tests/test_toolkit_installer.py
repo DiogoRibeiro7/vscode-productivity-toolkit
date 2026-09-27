@@ -9,6 +9,7 @@ from typing import Any, Dict
 import pytest
 
 from toolkit.installer import TaskInstaller
+from toolkit.utils import ValidationError
 
 
 def test_cli_install_preserves_shell_installer_metadata(
@@ -53,3 +54,33 @@ def test_cli_install_preserves_shell_installer_metadata(
     assert len(metadata) == 2
     assert metadata[1]["installedCategories"] == ["python-general"]
     assert metadata[1]["lastUpdated"]
+
+@pytest.mark.parametrize(
+    ("existing_content", "error"),
+    [
+        ('{"version": "2.0.0", "tasks": [', "Cannot read existing tasks.json"),
+        ("[]", "must be a JSON object"),
+    ],
+)
+def test_install_preserves_invalid_existing_tasks(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    existing_content: str,
+    error: str,
+) -> None:
+    vscode_dir = tmp_path / ".vscode"
+    vscode_dir.mkdir()
+    tasks_path = vscode_dir / "tasks.json"
+    tasks_path.write_text(existing_content, encoding="utf-8")
+    installer = TaskInstaller(tmp_path)
+
+    monkeypatch.setattr(
+        installer,
+        "_download_task_category",
+        lambda category: {"tasks": [{"label": "new", "command": "echo new"}]},
+    )
+
+    with pytest.raises(ValidationError, match=error):
+        installer.install_task_categories(["python-general"], create_backup=False)
+
+    assert tasks_path.read_text(encoding="utf-8") == existing_content

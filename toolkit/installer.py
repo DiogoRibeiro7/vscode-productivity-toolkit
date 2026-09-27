@@ -168,8 +168,13 @@ class TaskInstaller:
                 with open(self.tasks_file, 'r', encoding='utf-8') as f:
                     existing_tasks = json.load(f)
             except (json.JSONDecodeError, OSError) as e:
-                logger.warning(f"Could not read existing tasks.json: {e}")
-                existing_tasks = {}
+                raise ValidationError(
+                    f"Cannot read existing tasks.json at {self.tasks_file}: {e}"
+                ) from e
+            if not isinstance(existing_tasks, dict):
+                raise ValidationError(
+                    f"Existing tasks.json at {self.tasks_file} must be a JSON object"
+                )
 
         # Shell installers store source metadata as a list; preserve that format.
         metadata, tracker = self._prepare_metadata(

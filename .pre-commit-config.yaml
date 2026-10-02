@@ -87,7 +87,7 @@ repos:
 
   # Documentation and spelling
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.6
+    rev: v2.4.3
     hooks:
       - id: codespell
         args: ['--skip=*.lock,*.svg,node_modules,*.min.js']
